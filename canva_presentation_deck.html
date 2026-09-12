@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fitness Application - SRS Presentation Deck</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            cyan: '#06b6d4',
+                            purple: '#8b5cf6',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Kanit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Kanit', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .slide-container {
+            aspect-ratio: 16 / 9;
+            max-height: calc(100vh - 120px);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        .slide {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+        @media print {
+            body { background: white; color: black; }
+            .no-print { display: none !important; }
+            .slide { display: flex !important; opacity: 1 !important; page-break-after: always; height: 100vh; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-between select-none">
+
+    <!-- Top Header Navigation Bar -->
+    <header class="no-print h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 flex items-center justify-between z-30">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl gradient-bg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-bold text-white tracking-wide">AI-Powered Mobile Fitness App</h1>
+                <p class="text-xs text-slate-400">SRS v1.0 • Trauma Squad (Team 23)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Slide Counter -->
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                Slide <span id="current-slide-num" class="text-blue-400 font-bold">1</span> / <span id="total-slides-num">10</span>
+            </span>
+
+            <!-- Actions -->
+            <button onclick="toggleThumbnails()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Toggle Slide Grid">
+                <i class="fa-solid fa-border-all text-sm"></i>
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Full Screen">
+                <i class="fa-solid fa-expand text-sm"></i>
+            </button>
+            <button onclick="window.print()" class="px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-medium border border-blue-500/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-download"></i> Export PDF
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Canvas Viewport -->
+    <main class="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
+        
+        <!-- Thumbnail Drawer overlay -->
+        <div id="thumbnail-drawer" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md z-40 p-8 overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between mb-6 max-w-6xl mx-auto">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-500"></i> Slide Overview</h2>
+                <button onclick="toggleThumbnails()" class="text-slate-400 hover:text-white text-xl p-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-6xl mx-auto" id="thumbnail-grid">
+                <!-- Dynamically Populated Thumbnails -->
+            </div>
+        </div>
+
+        <!-- Slide Frame Container -->
+        <div class="w-full max-w-6xl slide-container rounded-2xl glass-panel shadow-2xl overflow-hidden relative border border-slate-700/50 flex flex-col">
+            
+            <!-- SLIDE 1: Title & Purpose -->
+            <div class="slide active flex-col h-full p-8 md:p-12 justify-between relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-xs uppercase tracking-widest font-bold px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">Executive Overview</span>
+                    <span class="text-xs text-slate-500 font-mono">SDLC: Agile / Scrum</span>
+                </div>
+
+                <div class="my-auto space-y-4 max-w-3xl">
+                    <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                        AI-Powered Mobile <br/><span class="gradient-text">Fitness Application</span>
+                    </h1>
+                    <p class="text-base text-slate-300 leading-relaxed">
+                        An intelligent workout assistant bridging the gap in home workouts through real-time computer vision pose estimation, muscle fatigue tracking, and Local LLM adaptive coaching.
+                    </p>
+                </div>
+
+                <!-- Core Stack Indicators -->
+                <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800">
+                    <div class="glass-card p-4 rounded-xl flex items-center space-x-3">
+                        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-400 text-xl"><i class="fa-solid fa-eye"></i></div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">Vision Engine</div>
+                            <div class="text-sm font-bold text-slate-100">Vision Pose AI</div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center space-x-3">
+                        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-400 text-xl"><i class="fa-solid fa-brain"></i></div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">AI Intelligence</div>
+                            <div class="text-sm font-bold text-slate-100">Local LLM Coach</div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl flex items-center space-x-3">
+                        <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-400 text-xl"><i class="fa-solid fa-database"></i></div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">Core State</div>
+                            <div class="text-sm font-bold text-slate-100">Personal Model</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Target Roles & Stakeholders -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-users text-blue-400"></i> Users & Stakeholders Matrix
+                    </h2>
+                    <span class="text-xs text-slate-500">Section 1.2</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+                    <!-- User Role -->
+                    <div class="glass-card p-5 rounded-2xl border-t-4 border-t-blue-500 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-bold text-blue-400">Primary User</span>
+                                <i class="fa-solid fa-user-gear text-slate-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">Trainee / End User</h3>
+                            <div class="text-xs text-slate-300 space-y-2">
+                                <p><strong class="text-blue-300">Needs:</strong> Posture feedback, rep counting, muscle recovery, adaptive plans, AI chat.</p>
+                                <p><strong class="text-rose-400">Fears:</strong> Inaccurate posture feedback, injury, privacy risks with raw video.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trainer Role -->
+                    <div class="glass-card p-5 rounded-2xl border-t-4 border-t-purple-500 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-bold text-purple-400">Human Reviewer</span>
+                                <i class="fa-solid fa-user-doctor text-slate-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">Certified Trainer</h3>
+                            <div class="text-xs text-slate-300 space-y-2">
+                                <p><strong class="text-purple-300">Needs:</strong> Review user history, validate high-risk AI recommendations, issue custom notes.</p>
+                                <p><strong class="text-rose-400">Fears:</strong> Accessing unassigned users, unreviewed AI high-risk plans.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Role -->
+                    <div class="glass-card p-5 rounded-2xl border-t-4 border-t-emerald-500 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-bold text-emerald-400">Administrator</span>
+                                <i class="fa-solid fa-shield-halved text-slate-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">System Admin</h3>
+                            <div class="text-xs text-slate-300 space-y-2">
+                                <p><strong class="text-emerald-300">Needs:</strong> Account management, RBAC control, model versions, audit log access.</p>
+                                <p><strong class="text-rose-400">Fears:</strong> Unauthorized config edits, privacy breaches in user logs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-700 text-xs text-slate-400 flex items-center justify-between">
+                    <span><i class="fa-solid fa-circle-info text-blue-400 mr-2"></i> Safety First: High-risk recommendations escalate directly to Human Trainers.</span>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Scope Breakdown & Constraints -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-emerald-400"></i> Scope Boundaries & Constraints
+                    </h2>
+                    <span class="text-xs text-slate-500">Section 2.1 - 2.2</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                    <!-- In Scope -->
+                    <div class="glass-card p-5 rounded-xl border border-emerald-500/20 bg-emerald-950/10">
+                        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> In Scope (MVP v1.0)
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                            <li>Real-time human pose estimation & landmark tracking</li>
+                            <li>Rep counting, set tracking & posture error scoring</li>
+                            <li>Muscle fatigue scoring & recovery estimation</li>
+                            <li>Local LLM adaptive workout planning & conversational chat</li>
+                            <li>Human-in-the-Loop Trainer Review workflow</li>
+                        </ul>
+                    </div>
+
+                    <!-- Out of Scope -->
+                    <div class="glass-card p-5 rounded-xl border border-rose-500/20 bg-rose-950/10">
+                        <h3 class="text-sm font-bold text-rose-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-xmark"></i> Out of Scope (Explicit Promise)
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2 list-disc list-inside">
+                            <li>Medical disease diagnosis or physical therapy treatment</li>
+                            <li>Wearable hardware integration (Smartwatch / HR sensors)</li>
+                            <li>In-app payments, subscriptions, or financial transactions</li>
+                            <li>Social feeds, community posts, or public marketplaces</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-amber-400 block mb-1"><i class="fa-solid fa-lock"></i> Privacy Constraint</strong>
+                        Raw camera frames are processed in-memory and NEVER stored or transmitted off-device.
+                    </div>
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+                        <strong class="text-blue-400 block mb-1"><i class="fa-solid fa-bolt"></i> Latency Constraint</strong>
+                        Pose estimation & form analysis execute locally under strict near-real-time latency limits.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: Functional Architecture Part 1 -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-camera text-cyan-400"></i> Core Functional Architecture (FR-1 to FR-6)
+                    </h2>
+                    <span class="text-xs text-slate-500">Computer Vision Core</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 my-auto">
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold mb-3">FR-2</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Pose Landmarks</h4>
+                        <p class="text-xs text-slate-300">Captures video frames, extracts key body joints continuous tracking, and alerts on low lighting or occlusion.</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold mb-3">FR-3</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Rep & Set Counting</h4>
+                        <p class="text-xs text-slate-300">Automatically identifies exercise state transitions, counting accurate reps while ignoring non-workout movement.</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold mb-3">FR-4</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Form Analysis</h4>
+                        <p class="text-xs text-slate-300">Generates real-time Form Score, error tags (e.g. knee caving), and under 15-word corrective audio cues.</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold mb-3">FR-5</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Muscle Workload</h4>
+                        <p class="text-xs text-slate-300">Estimates primary/secondary muscle activation per exercise (e.g., Quadriceps: High, Gluteus: Moderate).</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold mb-3">FR-6</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Fatigue & Recovery</h4>
+                        <p class="text-xs text-slate-300">Categorizes muscle groups into recovery states (High Fatigue -> Rest) to prevent overtraining syndrome.</p>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold mb-3">FR-9</div>
+                        <h4 class="text-sm font-bold text-white mb-1">Calorie & Hydration</h4>
+                        <p class="text-xs text-slate-300">Calculates energy output and hydration needs via deterministic engines, feeding verified metrics to LLM.</p>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 text-center">
+                    All exercise form and pose classification feedback runs locally on-device to maintain low latency.
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Functional Architecture Part 2 (AI & Human-in-the-Loop) -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-robot text-purple-400"></i> AI & Human-in-the-Loop Workflow (FR-7 to FR-12)
+                    </h2>
+                    <span class="text-xs text-slate-500">Adaptive Intelligence</span>
+                </div>
+
+                <!-- Workflow Diagram Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 my-auto">
+                    <!-- Step 1 -->
+                    <div class="glass-card p-4 rounded-xl relative">
+                        <span class="text-xs font-bold text-purple-400">01. Personal Model</span>
+                        <h4 class="text-sm font-bold text-white my-1">Context Aggregation</h4>
+                        <p class="text-xs text-slate-400">Stores historical reps, fatigue scores, and physical metrics timestamped cleanly.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="glass-card p-4 rounded-xl relative">
+                        <span class="text-xs font-bold text-blue-400">02. Local LLM</span>
+                        <h4 class="text-sm font-bold text-white my-1">Adaptive Generation</h4>
+                        <p class="text-xs text-slate-400">Generates dynamic workout plans & daily goals using structured JSON schemas.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="glass-card p-4 rounded-xl relative border-amber-500/40">
+                        <span class="text-xs font-bold text-amber-400">03. Safety Layer</span>
+                        <h4 class="text-sm font-bold text-white my-1">Risk Evaluation</h4>
+                        <p class="text-xs text-slate-400">Detects pain reports or high fatigue; prevents direct DB mutations.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="glass-card p-4 rounded-xl relative border-emerald-500/40">
+                        <span class="text-xs font-bold text-emerald-400">04. Trainer Review</span>
+                        <h4 class="text-sm font-bold text-white my-1">Human Approval</h4>
+                        <p class="text-xs text-slate-400">Escalated high-risk plans reviewed, modified, or approved by human trainers with audit log.</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 rounded-xl bg-purple-950/20 border-purple-500/20 flex items-center justify-between text-xs">
+                    <div>
+                        <strong class="text-purple-300 font-bold block">FR-10 AI Chatbot Interface</strong>
+                        Provides natural conversational guidance on workout plans while flagging out-of-scope queries for human review.
+                    </div>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full font-mono text-[10px]">Strict Safety Enforcement</span>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: Non-Functional Requirements & Performance -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-gauge-high text-amber-400"></i> Non-Functional Requirements & Quality Attributes
+                    </h2>
+                    <span class="text-xs text-slate-500">Section 4 (NFRs)</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 my-auto">
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-blue-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">Latency</div>
+                        <div class="text-xl font-extrabold text-blue-400 my-1">&lt; 100 ms</div>
+                        <div class="text-xs text-slate-300">Frame capture to posture UI rendering latency.</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-cyan-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">AI Inference</div>
+                        <div class="text-xl font-extrabold text-cyan-400 my-1">&lt; 50 ms</div>
+                        <div class="text-xs text-slate-300">On-device pose model inference per video frame.</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">API Performance</div>
+                        <div class="text-xl font-extrabold text-emerald-400 my-1">&lt; 1.5 sec</div>
+                        <div class="text-xs text-slate-300">Backend API request & response under standard load.</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-amber-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">Usability</div>
+                        <div class="text-xl font-extrabold text-amber-400 my-1">&lt; 45 sec</div>
+                        <div class="text-xs text-slate-300">Time for novice user to launch & start camera workout.</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-purple-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">Security</div>
+                        <div class="text-xl font-extrabold text-purple-400 my-1">OAuth2 / JWT</div>
+                        <div class="text-xs text-slate-300">RBAC security & TLS 1.3 transport encryption.</div>
+                    </div>
+
+                    <div class="glass-card p-4 rounded-xl border-l-4 border-l-rose-500">
+                        <div class="text-xs text-slate-400 uppercase font-semibold">Data Retention</div>
+                        <div class="text-xl font-extrabold text-rose-400 my-1">90 Days</div>
+                        <div class="text-xs text-slate-300">Automated purging of raw session telemetry data.</div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-400 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    <strong class="text-white">Reliability (NFR-4):</strong> Implements graceful degradation to basic rep counting if form model inference or network fails.
+                </div>
+            </div>
+
+            <!-- SLIDE 7: Golden Thread Matrix -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project text-purple-400"></i> Golden Thread Matrix (Traceability)
+                    </h2>
+                    <span class="text-xs text-slate-500">Section 7</span>
+                </div>
+
+                <div class="overflow-x-auto my-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-700 bg-slate-800/60 text-slate-300">
+                                <th class="p-3 rounded-tl-lg">Problem / Pain Point</th>
+                                <th class="p-3">Requirement</th>
+                                <th class="p-3">Solution / Design</th>
+                                <th class="p-3">Feature Built</th>
+                                <th class="p-3 rounded-tr-lg">Verification / Test</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-medium text-white">Workouts with uncorrected poor posture</td>
+                                <td class="p-3 text-cyan-400 font-mono">FR-4</td>
+                                <td class="p-3">CV Pose Estimation + Form Classifier</td>
+                                <td class="p-3">Real-time posture feedback & Form Score</td>
+                                <td class="p-3 text-slate-400">Form error scenarios on synthetic & live pose datasets</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-medium text-white">Overtraining from lack of fatigue insight</td>
+                                <td class="p-3 text-amber-400 font-mono">FR-6</td>
+                                <td class="p-3">Workload & Muscle Recovery Engine</td>
+                                <td class="p-3">Muscle recovery dashboard & rest guidance</td>
+                                <td class="p-3 text-slate-400">Multi-session fatigue buildup integration tests</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-medium text-white">Static plans failing to adapt to fatigue</td>
+                                <td class="p-3 text-purple-400 font-mono">FR-8</td>
+                                <td class="p-3">Local LLM adaptive generator + Context</td>
+                                <td class="p-3">Adaptive daily goal & workout generator</td>
+                                <td class="p-3 text-slate-400">Prompt context framing & Safety Layer tests</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/30">
+                                <td class="p-3 font-medium text-white">Pure AI issuing unsafe plans to high-risk users</td>
+                                <td class="p-3 text-emerald-400 font-mono">FR-11</td>
+                                <td class="p-3">Human-in-the-Loop review queue</td>
+                                <td class="p-3">Trainer review workflow portal</td>
+                                <td class="p-3 text-slate-400">Role-based auth & state transition unit tests</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-xs text-slate-500 italic text-right">
+                    Traceability guarantees alignment from user problem definition down to technical test cases.
+                </div>
+            </div>
+
+            <!-- SLIDE 8: Technical Risks & Trade-offs (NEW) -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Technical Risks & Architecture Trade-offs
+                    </h2>
+                    <span class="text-xs text-slate-500">Feedback Topic A</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+                    <div class="glass-card p-5 rounded-xl border-t-4 border-t-amber-500">
+                        <div class="flex items-center gap-2 text-amber-400 font-bold text-xs mb-2">
+                            <i class="fa-solid fa-microchip"></i> Risk 1: On-Device LLM Constraints
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-2">Mobile RAM & Battery Consumption</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+                            Running quantized Local LLMs alongside real-time MediaPipe/YOLO pose tracking may cause thermal throttling on lower-end devices.
+                        </p>
+                        <div class="p-2 bg-amber-950/30 border border-amber-500/20 rounded text-[11px] text-amber-300">
+                            <strong>Proposed Mitigation:</strong> Fallback to lightweight rules-engine or server-side hybrid LLM inference when device battery/RAM is low.
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-xl border-t-4 border-t-cyan-500">
+                        <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs mb-2">
+                            <i class="fa-solid fa-eye-slash"></i> Risk 2: Occlusion & Low Light
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-2">Pose Tracking Accuracy Degradation</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+                            User position relative to phone camera (loose clothing, tight bedroom spaces) affects joint coordinate accuracy.
+                        </p>
+                        <div class="p-2 bg-cyan-950/30 border border-cyan-500/20 rounded text-[11px] text-cyan-300">
+                            <strong>Proposed Mitigation:</strong> Visual bounds checking on UI during setup + strict pose confidence scoring threshold before evaluating form errors.
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-xl border-t-4 border-t-rose-500">
+                        <div class="flex items-center gap-2 text-rose-400 font-bold text-xs mb-2">
+                            <i class="fa-solid fa-shield-heart"></i> Risk 3: Safety Escalation Threshold
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-2">False Positives in Human Escalation</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed mb-3">
+                            Over-flagging safe routines to Human Trainers could overwhelm human reviewers, causing bottlenecks in workout approval.
+                        </p>
+                        <div class="p-2 bg-rose-950/30 border border-rose-500/20 rounded text-[11px] text-rose-300">
+                            <strong>Proposed Mitigation:</strong> Calibrated risk classification model with tiered triggers (Low Risk = Direct AI execution, High Risk = Trainer Review).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-400 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center">
+                    <span><i class="fa-solid fa-comments text-amber-400 mr-2"></i> <strong>Area for Advisor Guidance:</strong> How strict should the Safety Layer boundary be between automated AI vs. Mandatory Trainer Escalation?</span>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: Questions & Discussion Points for Professor (NEW) -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-question text-cyan-400"></i> Areas for Instructor Review & Feedback
+                    </h2>
+                    <span class="text-xs text-slate-500">Feedback Topic B</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-auto">
+                    <!-- Point 1 -->
+                    <div class="glass-card p-4 rounded-xl flex items-start space-x-3 border-l-4 border-l-blue-500">
+                        <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-1">Architecture Choice: Local vs. Hybrid LLM</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Is forcing 100% Local LLM on mobile realistic for dynamic workout generation, or should we refine NFR-2 to permit a privacy-preserving hybrid cloud LLM fallback?
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Point 2 -->
+                    <div class="glass-card p-4 rounded-xl flex items-start space-x-3 border-l-4 border-l-purple-500">
+                        <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-1">Form Analysis Verification Dataset</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                What is the recommended methodology for validating FR-4 (Exercise Form Score) during Milestone 3? Should we use synthetic pose models or record a benchmark video dataset?
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Point 3 -->
+                    <div class="glass-card p-4 rounded-xl flex items-start space-x-3 border-l-4 border-l-emerald-500">
+                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold shrink-0">3</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-1">Scope Granularity (MVP vs. Future)</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Are our explicitly stated Out-of-Scope items (e.g. wearables integration, payment) realistic for a 1-semester Agile project, or are we missing any implicit scope creep?
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Point 4 -->
+                    <div class="glass-card p-4 rounded-xl flex items-start space-x-3 border-l-4 border-l-rose-500">
+                        <div class="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm font-bold shrink-0">4</div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-1">Trainer Platform Workflow Granularity</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                In FR-11 (Trainer Platform), is an asynchronous approval queue sufficient for Human-in-the-Loop, or should real-time trainer override options be included in the SRS?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-cyan-950/20 border border-cyan-500/30 rounded-xl text-xs text-cyan-300 text-center font-medium">
+                    <i class="fa-solid fa-lightbulb mr-2"></i> We welcome your feedback on refining our Functional Requirements & Architecture before entering Milestone 3 implementation.
+                </div>
+            </div>
+
+            <!-- SLIDE 10: AI Usage Log & Verification -->
+            <div class="slide flex-col h-full p-8 md:p-12 justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-400"></i> Project Verification & Governance
+                    </h2>
+                    <span class="text-xs text-slate-500">Sections 8 - 9</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                    <!-- Verification Checklist -->
+                    <div class="glass-card p-5 rounded-xl">
+                        <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-check-double text-emerald-400"></i> Self-Check Standards
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i> Explicit Scope & Out-of-Scope boundaries defined.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i> User Stories linked to real physical pain points.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i> Testable Given-When-Then Acceptance Criteria.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i> Measurable NFR targets with checking methodologies.</li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i> Complete Golden Thread Traceability Matrix included.</li>
+                        </ul>
+                    </div>
+
+                    <!-- AI Usage Log Summary -->
+                    <div class="glass-card p-5 rounded-xl border border-blue-500/20">
+                        <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-laptop-code text-blue-400"></i> Transparent AI Usage Log
+                        </h3>
+                        <div class="text-xs text-slate-300 space-y-2">
+                            <p><strong class="text-slate-200">Date & Tool:</strong> 28 Aug 2026 | ChatGPT (GPT-5.6)</p>
+                            <p><strong class="text-slate-200">Prompt Purpose:</strong> Reformat draft SRS into structured User Stories, Given/When/Then criteria, and Golden Thread matrix.</p>
+                            <p><strong class="text-slate-200">Human Refinement:</strong> Removed draft annotations, translated Thai draft prose into technical English, consolidated duplicates, verified technical constraints.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 gradient-bg rounded-xl text-center text-white font-bold text-sm shadow-lg">
+                    AI Fitness Application SRS v1.0 • Ready for Milestone 3/4 Implementation
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Presentation Control Bar -->
+    <footer class="no-print h-16 border-t border-slate-800 bg-slate-900/80 backdrop-blur px-6 flex items-center justify-between z-30">
+        <button onclick="prevSlide()" id="prev-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-chevron-left"></i> Previous
+        </button>
+
+        <!-- Slide Indicators -->
+        <div class="flex items-center space-x-2" id="dots-container">
+            <!-- Dynamic Dots -->
+        </div>
+
+        <button onclick="nextSlide()" id="next-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+            Next <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides-num').textContent = totalSlides;
+
+        function initPresentation() {
+            createDots();
+            createThumbnails();
+            showSlide(currentSlide);
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, idx) => {
+                slide.classList.remove('active');
+                if (idx === index) {
+                    slide.classList.add('active');
+                }
+            });
+
+            currentSlide = index;
+            document.getElementById('current-slide-num').textContent = currentSlide + 1;
+
+            // Update Control Buttons
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+
+            // Update Dots
+            const dots = document.querySelectorAll('.slide-dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentSlide) {
+                    dot.className = 'slide-dot w-6 h-2 rounded-full bg-blue-500 transition-all';
+                } else {
+                    dot.className = 'slide-dot w-2 h-2 rounded-full bg-slate-700 hover:bg-slate-500 transition-all cursor-pointer';
+                }
+            });
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function createDots() {
+            const container = document.getElementById('dots-container');
+            container.innerHTML = '';
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.onclick = () => showSlide(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function createThumbnails() {
+            const grid = document.getElementById('thumbnail-grid');
+            grid.innerHTML = '';
+            const titles = [
+                "1. Cover & Scope",
+                "2. Stakeholders Matrix",
+                "3. MVP Scope & Limits",
+                "4. CV & Pose Engine",
+                "5. AI Coach & Safety",
+                "6. NFRs & Metrics",
+                "7. Golden Thread Matrix",
+                "8. Technical Risks & Trade-offs",
+                "9. Professor Discussion Points",
+                "10. Governance & Self Check"
+            ];
+
+            titles.forEach((title, idx) => {
+                const card = document.createElement('div');
+                card.className = `glass-card p-3 rounded-xl cursor-pointer hover:border-blue-500 transition flex flex-col justify-between h-28 ${idx === currentSlide ? 'border-2 border-blue-500 bg-blue-950/20' : ''}`;
+                card.innerHTML = `
+                    <span class="text-[10px] font-mono text-blue-400 font-bold">SLIDE ${idx + 1}</span>
+                    <span class="text-xs font-bold text-white line-clamp-2">${title}</span>
+                    <span class="text-[9px] text-slate-500">Click to jump</span>
+                `;
+                card.onclick = () => {
+                    showSlide(idx);
+                    toggleThumbnails();
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleThumbnails() {
+            const drawer = document.getElementById('thumbnail-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'Escape') {
+                document.getElementById('thumbnail-drawer').classList.add('hidden');
+            }
+        });
+
+        initPresentation();
+    </script>
+</body>
+</html>
