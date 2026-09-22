@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FORGE — Gym Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14130F;
+  --surface:#1E1C17;
+  --surface-2:#26241D;
+  --border: rgba(245,243,238,0.10);
+  --border-strong: rgba(245,243,238,0.18);
+  --text: #F5F3EE;
+  --text-secondary:#A7A296;
+  --text-muted:#6E6A5F;
+  --accent:#FF5A1F;
+  --accent-text:#FFD9C6;
+  --accent-bg: rgba(255,90,31,0.14);
+  --recovery:#2BB3A3;
+  --recovery-text:#B7ECE5;
+  --recovery-bg: rgba(43,179,163,0.14);
+  --danger:#E4574B;
+  --radius:16px;
+  --font-head: 'Barlow Condensed', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  display:flex;
+  justify-content:center;
+  min-height:100vh;
+}
+.shell{
+  width:100%;
+  max-width:440px;
+  min-height:100%;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  border-left:0.5px solid var(--border);
+  border-right:0.5px solid var(--border);
+}
+.topbar{
+  padding:20px 20px 14px;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+}
+.topbar .brand{
+  font-family:var(--font-head);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0.5px;
+}
+.topbar .brand span{color:var(--accent);}
+.topbar .streak{
+  font-size:13px;
+  color:var(--text-secondary);
+}
+main{
+  flex:1;
+  padding:4px 20px 100px;
+}
+.screen{display:none;}
+.screen.active{display:block;}
+h1.page-title{
+  font-family:var(--font-head);
+  font-weight:600;
+  font-size:32px;
+  margin:6px 0 4px;
+  letter-spacing:0.3px;
+}
+p.page-sub{
+  color:var(--text-secondary);
+  font-size:14px;
+  margin:0 0 20px;
+  line-height:1.5;
+}
+.segment{
+  display:flex;
+  gap:6px;
+  background:var(--surface);
+  border-radius:12px;
+  padding:4px;
+  margin-bottom:18px;
+  border:0.5px solid var(--border);
+}
+.segment button{
+  flex:1;
+  border:none;
+  background:transparent;
+  color:var(--text-secondary);
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:500;
+  padding:9px 0;
+  border-radius:9px;
+  cursor:pointer;
+}
+.segment button.active{
+  background:var(--accent);
+  color:#1B0A03;
+  font-weight:600;
+}
+.card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:14px;
+}
+.card-title{
+  font-size:15px;
+  font-weight:600;
+  margin:0 0 2px;
+}
+.card-sub{
+  font-size:13px;
+  color:var(--text-secondary);
+  margin:0 0 12px;
+}
+.exercise-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 0;
+  border-top:0.5px solid var(--border);
+}
+.exercise-row:first-of-type{border-top:none;}
+.exercise-num{
+  font-family:var(--font-head);
+  font-size:20px;
+  color:var(--text-muted);
+  width:22px;
+}
+.exercise-info{flex:1;}
+.exercise-name{font-size:14px; font-weight:500;}
+.exercise-meta{font-size:12px; color:var(--text-secondary); margin-top:2px;}
+.remove-btn{
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  font-size:18px;
+  cursor:pointer;
+  padding:4px 6px;
+}
+.add-exercise-form{
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.add-exercise-form input{
+  grid-column:span 1;
+}
+.add-exercise-form .name-field{grid-column: 1 / -1;}
+input, select{
+  width:100%;
+  height:38px;
+  background:var(--surface-2);
+  border:0.5px solid var(--border-strong);
+  border-radius:9px;
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:13px;
+  padding:0 10px;
+}
+input::placeholder{color:var(--text-muted);}
+label.field-label{
+  font-size:12px;
+  color:var(--text-secondary);
+  display:block;
+  margin:0 0 5px;
+}
+.btn{
+  height:42px;
+  border-radius:10px;
+  border:0.5px solid var(--border-strong);
+  background:var(--surface-2);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:14px;
+  cursor:pointer;
+  width:100%;
+}
+.btn-accent{
+  background:var(--accent);
+  color:#1B0A03;
+  border:none;
+  font-weight:600;
+}
+.btn-ghost{
+  background:transparent;
+}
+.btn-sm{
+  height:32px;
+  font-size:12px;
+  padding:0 12px;
+  width:auto;
+}
+.muscle-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 0;
+  border-top:0.5px solid var(--border);
+}
+.muscle-row:first-of-type{border-top:none;}
+.muscle-name{
+  width:84px;
+  font-size:13px;
+  font-weight:500;
+}
+.muscle-bar-track{
+  flex:1;
+  height:6px;
+  border-radius:3px;
+  background:var(--surface-2);
+  overflow:hidden;
+}
+.muscle-bar-fill{
+  height:100%;
+  border-radius:3px;
+}
+.muscle-status{
+  width:96px;
+  text-align:right;
+  font-size:12px;
+  color:var(--text-secondary);
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.stat-card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  border:0.5px solid var(--border);
+}
+.stat-label{font-size:12px; color:var(--text-secondary); margin:0 0 4px;}
+.stat-value{font-family:var(--font-head); font-size:26px; font-weight:600; margin:0;}
+.stat-value small{font-family:var(--font-body); font-size:13px; color:var(--text-secondary); font-weight:400;}
+.calc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.work-camera{
+  position:relative;
+  aspect-ratio: 3 / 4;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2));
+  border-radius:20px;
+  border:0.5px solid var(--border-strong);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:16px;
+}
+.work-camera .grid-overlay{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, rgba(245,243,238,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245,243,238,0.05) 1px, transparent 1px);
+  background-size: 12.5% 12.5%;
+}
+.work-camera .skeleton-placeholder{
+  color:var(--text-muted);
+  text-align:center;
+  padding:0 30px;
+}
+.work-camera .skeleton-placeholder i{
+  font-size:40px;
+  display:block;
+  margin:0 auto 10px;
+}
+.corner{
+  position:absolute;
+  width:22px; height:22px;
+  border-color:var(--accent);
+  border-style:solid;
+}
+.corner.tl{top:14px; left:14px; border-width:2px 0 0 2px; border-radius:4px 0 0 0;}
+.corner.tr{top:14px; right:14px; border-width:2px 2px 0 0; border-radius:0 4px 0 0;}
+.corner.bl{bottom:14px; left:14px; border-width:0 0 2px 2px; border-radius:0 0 0 4px;}
+.corner.br{bottom:14px; right:14px; border-width:0 2px 2px 0; border-radius:0 0 4px 0;}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:20px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  border:0.5px solid var(--border-strong);
+}
+.badge-dot{width:6px; height:6px; border-radius:50%; background:var(--text-muted);}
+.chat-toggle{
+  display:flex;
+  gap:6px;
+  margin-bottom:16px;
+}
+.chip{
+  padding:8px 14px;
+  border-radius:20px;
+  border:0.5px solid var(--border-strong);
+  font-size:13px;
+  background:var(--surface);
+  color:var(--text-secondary);
+}
+.chip.active{
+  background:var(--accent-bg);
+  border-color:var(--accent);
+  color:var(--accent-text);
+}
+.chat-bubble{
+  max-width:78%;
+  padding:10px 14px;
+  border-radius:14px;
+  font-size:13.5px;
+  line-height:1.5;
+  margin-bottom:10px;
+}
+.chat-bubble.them{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-bottom-left-radius:4px;
+}
+.chat-bubble.me{
+  background:var(--accent);
+  color:#1B0A03;
+  margin-left:auto;
+  border-bottom-right-radius:4px;
+}
+.chat-input-row{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+.settings-list .settings-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 0;
+  border-top:0.5px solid var(--border);
+  color:var(--text-secondary);
+}
+.settings-list .settings-item:first-child{border-top:none;}
+.settings-item i{font-size:18px; width:20px; text-align:center;}
+.settings-item span{flex:1; font-size:14px; color:var(--text);}
+.coming-soon-tag{
+  font-size:11px;
+  color:var(--text-muted);
+  border:0.5px solid var(--border-strong);
+  padding:2px 8px;
+  border-radius:8px;
+}
+.empty-hint{
+  font-size:12px;
+  color:var(--text-muted);
+  text-align:center;
+  padding:18px 0 4px;
+}
+nav.bottombar{
+  position:sticky;
+  bottom:0;
+  left:0; right:0;
+  background:rgba(20,19,15,0.92);
+  backdrop-filter:blur(6px);
+  border-top:0.5px solid var(--border);
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.nav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  font-family:var(--font-body);
+  font-size:10.5px;
+  cursor:pointer;
+  padding:4px 0;
+}
+.nav-item i{font-size:19px;}
+.nav-item.active{color:var(--text);}
+.nav-item.active i{color:var(--accent);}
+.nav-item.work-btn{
+  flex:0 0 64px;
+  margin-top:-26px;
+}
+.nav-item.work-btn .work-circle{
+  width:56px; height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:4px solid var(--bg);
+  margin-bottom:2px;
+}
+.nav-item.work-btn .work-circle i{font-size:22px; color:#1B0A03;}
+.nav-item.work-btn span{color:var(--text-secondary);}
+.sr-only{
+  position:absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+</style>
+</head>
+<body>
+<h2 class="sr-only">แอปออกกำลังกายสำหรับเข้ายิม มีแท็บวางแผน ติดตามสภาพร่างกาย กล้อง AI ติดตามท่าทาง แชทกับเทรนเนอร์ และตั้งค่า</h2>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">FORGE<span>.</span></div>
+    <div class="streak"><i class="ic" data-ic="flame"></i> 4 วันติด</div>
+  </div>
+
+  <main>
+
+    <!-- PLAN -->
+    <section class="screen active" id="screen-plan">
+      <h1 class="page-title">แผนของคุณ</h1>
+      <p class="page-sub">เลือกประเภทการฝึก แล้วปรับท่าออกกำลังกายให้เข้ากับเป้าหมายวันนี้</p>
+
+      <div class="segment" id="plan-segment">
+        <button class="active" data-plan="gym">ยิม</button>
+        <button data-plan="cardio">คาร์ดิโอ</button>
+        <button data-plan="yoga">โยคะ</button>
+      </div>
+
+      <div id="plan-body"></div>
+    </section>
+
+    <!-- BODY -->
+    <section class="screen" id="screen-body">
+      <h1 class="page-title">ร่างกาย</h1>
+      <p class="page-sub">ติดตามความล้าของกล้ามเนื้อ เวลาพักที่เหลือ และพลังงานที่ใช้</p>
+
+      <div class="card">
+        <p class="card-title">การพักฟื้นของกล้ามเนื้อ</p>
+        <p class="card-sub">แตะ "ฝึกแล้ว" หลังซ้อมเพื่อเริ่มนับเวลาพักใหม่</p>
+        <div id="muscle-list"></div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">คำนวณพลังงานที่ใช้ต่อวัน (TDEE)</p>
+        <p class="card-sub">กรอกข้อมูลร่างกายเพื่อประเมินแคลอรี่ที่ควรได้รับ</p>
+        <div class="calc-grid">
+          <div>
+            <label class="field-label">เพศ</label>
+            <select id="calc-gender">
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">อายุ</label>
+            <input id="calc-age" type="number" value="28" min="10" max="90">
+          </div>
+          <div>
+            <label class="field-label">น้ำหนัก (กก.)</label>
+            <input id="calc-weight" type="number" value="68" min="30" max="200">
+          </div>
+          <div>
+            <label class="field-label">ส่วนสูง (ซม.)</label>
+            <input id="calc-height" type="number" value="172" min="120" max="230">
+          </div>
+        </div>
+        <label class="field-label">ระดับกิจกรรม</label>
+        <select id="calc-activity" style="margin-bottom:14px;">
+          <option value="1.2">น้อยมาก (นั่งทำงาน ไม่ค่อยขยับ)</option>
+          <option value="1.375">น้อย (ออกกำลังกาย 1-3 วัน/สัปดาห์)</option>
+          <option value="1.55" selected>ปานกลาง (ออกกำลังกาย 3-5 วัน/สัปดาห์)</option>
+          <option value="1.725">มาก (ออกกำลังกาย 6-7 วัน/สัปดาห์)</option>
+          <option value="1.9">มากที่สุด (นักกีฬา / ใช้แรงงานหนัก)</option>
+        </select>
+        <div class="stat-grid" style="margin-bottom:0;">
+          <div class="stat-card">
+            <p class="stat-label">BMR</p>
+            <p class="stat-value" id="bmr-out">— <small>kcal</small></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">TDEE โดยประมาณ</p>
+            <p class="stat-value" id="tdee-out">— <small>kcal</small></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORK -->
+    <section class="screen" id="screen-work">
+      <h1 class="page-title">Work</h1>
+      <p class="page-sub">เปิดกล้องเพื่อให้ระบบช่วยจับท่าทางระหว่างซ้อม</p>
+
+      <div class="work-camera">
+        <div class="grid-overlay"></div>
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+        <div class="skeleton-placeholder">
+          <i class="ic" data-ic="camera" style="font-size:40px;"></i>
+          <div style="font-size:13px;">มุมกล้องจะแสดงที่นี่</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span class="badge"><span class="badge-dot"></span>AI body tracking · กำลังพัฒนา</span>
+        <span class="badge">0 ครั้ง</span>
+      </div>
+
+      <button class="btn btn-accent" id="work-start-btn">เริ่มซ้อม</button>
+      <p class="empty-hint">ตอนนี้เป็นเพียงหน้าตา UI ระบบนับท่าทางอัตโนมัติยังไม่เปิดใช้งาน</p>
+    </section>
+
+    <!-- TRAINER / AI CHAT -->
+    <section class="screen" id="screen-chat">
+      <h1 class="page-title">Trainer</h1>
+      <p class="page-sub">คุยกับเทรนเนอร์จริงหรือผู้ช่วย AI</p>
+
+      <div class="chat-toggle" id="chat-toggle">
+        <button class="chip active" data-chat="trainer">เทรนเนอร์</button>
+        <button class="chip" data-chat="ai">AI chat</button>
+      </div>
+
+      <div class="card" style="padding-top:18px;">
+        <div id="chat-thread">
+          <div class="chat-bubble them">สวัสดีครับ วันนี้อยากซ้อมส่วนไหนดี</div>
+          <div class="chat-bubble me">อยากเน้นอกกับไทรเซปส์ครับ</div>
+          <div class="chat-bubble them">โอเค เดี๋ยวจัดโปรแกรมให้ในแท็บ Plan นะ</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" placeholder="พิมพ์ข้อความ… (ยังใช้งานไม่ได้)" disabled>
+          <button class="btn btn-sm" style="width:44px; flex-shrink:0;" disabled><i class="ic" data-ic="send"></i></button>
+        </div>
+      </div>
+      <p class="empty-hint">ส่วนนี้เป็น placeholder รอเชื่อมระบบแชทจริงในอนาคต</p>
+    </section>
+
+    <!-- SETTING -->
+    <section class="screen" id="screen-setting">
+      <h1 class="page-title">ตั้งค่า</h1>
+      <p class="page-sub">จัดการบัญชีและการตั้งค่าแอป</p>
+
+      <div class="card settings-list">
+        <div class="settings-item"><i class="ic" data-ic="user"></i><span>บัญชีของฉัน</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+        <div class="settings-item"><i class="ic" data-ic="bell"></i><span>การแจ้งเตือน</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+        <div class="settings-item"><i class="ic" data-ic="ruler"></i><span>หน่วยวัด (กก. / ปอนด์)</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+        <div class="settings-item"><i class="ic" data-ic="shield"></i><span>ความเป็นส่วนตัว</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+        <div class="settings-item"><i class="ic" data-ic="info"></i><span>เกี่ยวกับแอป</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+      </div>
+      <p class="empty-hint">หน้านี้เป็น placeholder รอออกแบบระบบตั้งค่าจริง</p>
+    </section>
+
+  </main>
+
+  <nav class="bottombar">
+    <button class="nav-item active" data-screen="plan"><i class="ic" data-ic="list"></i><span>Plan</span></button>
+    <button class="nav-item" data-screen="body"><i class="ic" data-ic="body"></i><span>Body</span></button>
+    <button class="nav-item work-btn" data-screen="work">
+      <div class="work-circle"><i class="ic" data-ic="camera"></i></div>
+      <span>Work</span>
+    </button>
+    <button class="nav-item" data-screen="chat"><i class="ic" data-ic="chat"></i><span>Trainer</span></button>
+    <button class="nav-item" data-screen="setting"><i class="ic" data-ic="settings"></i><span>Setting</span></button>
+  </nav>
+</div>
+
+<script>
+/* ---------- minimal inline icon set (no external icon font) ---------- */
+const ICONS = {
+  flame:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2-1-3.5 2 1 3 3.5 3 5.5a6 6 0 0 1-12 0C6 8 9 6 12 2z"/></svg>',
+  list:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  body:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2.4"/><path d="M12 8.5v6M8.5 11h7M9 20l3-5.5L15 20"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.2-1.6l2-1.6-2-3.4-2.4.8a7 7 0 0 0-2.8-1.6L13 2h-4l-.6 2.6a7 7 0 0 0-2.8 1.6l-2.4-.8-2 3.4 2 1.6A7 7 0 0 0 3 12c0 .5.1 1.1.2 1.6l-2 1.6 2 3.4 2.4-.8a7 7 0 0 0 2.8 1.6L11 22h4l.6-2.6a7 7 0 0 0 2.8-1.6l2.4.8 2-3.4-2-1.6c.1-.5.2-1.1.2-1.6z"/></svg>',
+  user:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5 1.5 6H4.5C4.5 15 6 14 6 10z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
+  ruler:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v3M11 8v3M15 8v3"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>',
+  info:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  send:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>'
+};
+function paintIcons(root){
+  (root||document).querySelectorAll('i.ic[data-ic]').forEach(el=>{
+    const k = el.getAttribute('data-ic');
+    if(ICONS[k]) el.innerHTML = ICONS[k];
+  });
+}
+paintIcons();
+
+/* ---------- bottom nav + screen switching ---------- */
+const navItems = document.querySelectorAll('.nav-item');
+const screens = document.querySelectorAll('.screen');
+navItems.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = btn.getAttribute('data-screen');
+    navItems.forEach(b=>b.classList.toggle('active', b===btn));
+    screens.forEach(s=>s.classList.toggle('active', s.id === 'screen-'+target));
+  });
+});
+
+/* ---------- PLAN tab ---------- */
+const planData = {
+  gym: [
+    {name:'เบนช์เพรส', sets:4, reps:8, weight:60},
+    {name:'สควอท', sets:4, reps:10, weight:80},
+    {name:'ดึงข้อบาร์', sets:3, reps:8, weight:0},
+    {name:'ดัมเบลเคิร์ล', sets:3, reps:12, weight:12}
+  ],
+  cardio: [
+    {name:'วิ่งบนลู่', sets:1, reps:'20 นาที', weight:null},
+    {name:'ปั่นจักรยาน', sets:1, reps:'15 นาที', weight:null},
+    {name:'กระโดดเชือก', sets:3, reps:'2 นาที', weight:null}
+  ],
+  yoga: [
+    {name:'Sun salutation', sets:3, reps:'รอบ', weight:null},
+    {name:'ท่านักรบ (Warrior II)', sets:2, reps:'30 วิ/ข้าง', weight:null},
+    {name:'ท่าเด็ก (Child pose)', sets:1, reps:'1 นาที', weight:null}
+  ]
+};
+let currentPlan = 'gym';
+
+function renderPlan(){
+  const wrap = document.getElementById('plan-body');
+  const list = planData[currentPlan];
+  const unitLabel = currentPlan === 'gym' ? 'เซต × ครั้ง (กก.)' : currentPlan === 'cardio' ? 'รอบ / เวลา' : 'เซต / ค้างท่า';
+
+  let rows = list.map((ex, i) => `
+    <div class="exercise-row" data-idx="${i}">
+      <div class="exercise-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="exercise-info">
+        <div class="exercise-name">${ex.name}</div>
+        <div class="exercise-meta">${ex.sets} เซต · ${ex.reps}${ex.weight ? ' · ' + ex.weight + ' กก.' : ''}</div>
+      </div>
+      <button class="remove-btn" data-remove="${i}" aria-label="ลบท่านี้">${ICONS.x}</button>
+    </div>
+  `).join('');
+
+  if(!list.length){
+    rows = '<p class="empty-hint">ยังไม่มีท่าในแผนนี้ เพิ่มท่าแรกได้เลย</p>';
+  }
+
+  wrap.innerHTML = `
+    <div class="card">
+      <p class="card-title">แผน${currentPlan==='gym'?'ยิม':currentPlan==='cardio'?'คาร์ดิโอ':'โยคะ'}วันนี้</p>
+      <p class="card-sub">${unitLabel}</p>
+      ${rows}
+      <div class="add-exercise-form">
+        <div class="name-field">
+          <input type="text" id="new-ex-name" placeholder="ชื่อท่าออกกำลังกาย">
+        </div>
+        <input type="number" id="new-ex-sets" placeholder="เซต" min="1">
+        <input type="text" id="new-ex-reps" placeholder="ครั้ง/เวลา">
+      </div>
+      <button class="btn btn-ghost btn-sm" id="add-ex-btn" style="margin-top:10px; width:100%;">
+        เพิ่มท่าออกกำลังกาย
+      </button>
+    </div>
+  `;
+
+  wrap.querySelectorAll('[data-remove]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = parseInt(b.getAttribute('data-remove'));
+      planData[currentPlan].splice(idx,1);
+      renderPlan();
+    });
+  });
+
+  document.getElementById('add-ex-btn').addEventListener('click', ()=>{
+    const nameEl = document.getElementById('new-ex-name');
+    const setsEl = document.getElementById('new-ex-sets');
+    const repsEl = document.getElementById('new-ex-reps');
+    const name = nameEl.value.trim();
+    if(!name){
+      nameEl.style.borderColor = 'var(--danger)';
+      nameEl.placeholder = 'กรอกชื่อท่าก่อนเพิ่ม';
+      return;
+    }
+    planData[currentPlan].push({
+      name,
+      sets: parseInt(setsEl.value) || 1,
+      reps: repsEl.value.trim() || '-',
+      weight: currentPlan === 'gym' ? (parseFloat(setsEl.dataset.weight)||0) : null
+    });
+    renderPlan();
+  });
+}
+
+document.getElementById('plan-segment').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-plan]');
+  if(!btn) return;
+  currentPlan = btn.getAttribute('data-plan');
+  document.querySelectorAll('#plan-segment button').forEach(b=>b.classList.toggle('active', b===btn));
+  renderPlan();
+});
+renderPlan();
+
+/* ---------- BODY tab: muscle recovery ---------- */
+const REST_HOURS = 48;
+const muscles = [
+  {name:'อก', lastTrained: Date.now() - 40*3600*1000},
+  {name:'หลัง', lastTrained: Date.now() - 10*3600*1000},
+  {name:'ขา', lastTrained: Date.now() - 60*3600*1000},
+  {name:'ไหล่', lastTrained: Date.now() - 5*3600*1000},
+  {name:'แขน', lastTrained: Date.now() - 30*3600*1000}
+];
+
+function renderMuscles(){
+  const wrap = document.getElementById('muscle-list');
+  wrap.innerHTML = muscles.map((m,i)=>{
+    const hoursSince = (Date.now() - m.lastTrained) / 3600000;
+    const pct = Math.max(0, Math.min(100, (hoursSince / REST_HOURS) * 100));
+    const recovered = pct >= 100;
+    const hoursLeft = Math.max(0, REST_HOURS - hoursSince);
+    const color = recovered ? 'var(--recovery)' : 'var(--accent)';
+    const statusText = recovered ? 'พร้อมฝึก' : `เหลือ ${hoursLeft.toFixed(0)} ชม.`;
+    return `
+      <div class="muscle-row">
+        <div class="muscle-name">${m.name}</div>
+        <div class="muscle-bar-track"><div class="muscle-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+        <div class="muscle-status" style="color:${recovered?'var(--recovery-text)':'var(--text-secondary)'}">${statusText}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin:6px 0 4px; width:100%;" data-train="${i}">ฝึก${m.name}แล้ว · เริ่มนับพักใหม่</button>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('[data-train]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = parseInt(b.getAttribute('data-train'));
+      muscles[idx].lastTrained = Date.now();
+      renderMuscles();
+    });
+  });
+}
+renderMuscles();
+setInterval(renderMuscles, 60000);
+
+/* ---------- BODY tab: TDEE calculator ---------- */
+function calcTDEE(){
+  const gender = document.getElementById('calc-gender').value;
+  const age = parseFloat(document.getElementById('calc-age').value) || 0;
+  const weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+  const height = parseFloat(document.getElementById('calc-height').value) || 0;
+  const activity = parseFloat(document.getElementById('calc-activity').value) || 1.2;
+
+  let bmr = 10*weight + 6.25*height - 5*age + (gender === 'male' ? 5 : -161);
+  bmr = Math.max(0, bmr);
+  const tdee = bmr * activity;
+
+  document.getElementById('bmr-out').innerHTML = `${Math.round(bmr).toLocaleString()} <small>kcal</small>`;
+  document.getElementById('tdee-out').innerHTML = `${Math.round(tdee).toLocaleString()} <small>kcal</small>`;
+}
+['calc-gender','calc-age','calc-weight','calc-height','calc-activity'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcTDEE);
+  document.getElementById(id).addEventListener('change', calcTDEE);
+});
+calcTDEE();
+
+/* ---------- WORK tab ---------- */
+const workBtn = document.getElementById('work-start-btn');
+let workRunning = false;
+workBtn.addEventListener('click', ()=>{
+  workRunning = !workRunning;
+  workBtn.textContent = workRunning ? 'หยุดซ้อม' : 'เริ่มซ้อม';
+  workBtn.classList.toggle('btn-accent', !workRunning);
+});
+
+/* ---------- TRAINER / AI CHAT toggle ---------- */
+const trainerThread = [
+  '<div class="chat-bubble them">สวัสดีครับ วันนี้อยากซ้อมส่วนไหนดี</div>',
+  '<div class="chat-bubble me">อยากเน้นอกกับไทรเซปส์ครับ</div>',
+  '<div class="chat-bubble them">โอเค เดี๋ยวจัดโปรแกรมให้ในแท็บ Plan นะ</div>'
+].join('');
+const aiThread = [
+  '<div class="chat-bubble them">สวัสดี ให้ AI ช่วยวางแผนซ้อมวันนี้ไหม</div>',
+  '<div class="chat-bubble me">ช่วยแนะนำท่าคาร์ดิโอเบาๆ หน่อย</div>',
+  '<div class="chat-bubble them">แนะนำ: เดินเร็ว 20 นาที + ปั่นจักรยาน 10 นาที</div>'
+].join('');
+document.getElementById('chat-toggle').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('#chat-toggle .chip').forEach(c=>c.classList.toggle('active', c===chip));
+  document.getElementById('chat-thread').innerHTML = chip.getAttribute('data-chat') === 'trainer' ? trainerThread : aiThread;
+});
+</script>
+</body>
+</html>
