@@ -430,6 +430,38 @@ nav.bottombar{
   padding:0; margin:-1px; overflow:hidden;
   clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
+
+.set-head{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
+.set-head .card-title{margin:0;}
+.set-head i{color:var(--accent); display:flex;}
+.set-field{margin-bottom:12px;}
+.switch{
+  flex:none; width:44px; height:26px; border-radius:13px;
+  border:0.5px solid var(--border-strong); background:var(--surface-2);
+  position:relative; cursor:pointer; padding:0;
+}
+.switch::after{
+  content:''; position:absolute; top:2px; left:2px; width:20px; height:20px;
+  border-radius:50%; background:var(--text-secondary); transition:transform .15s;
+}
+.switch[aria-checked="true"]{background:var(--accent); border-color:var(--accent);}
+.switch[aria-checked="true"]::after{transform:translateX(18px); background:#1B0A03;}
+.settings-item input[type="time"]{width:112px; flex:none;}
+.btn-danger{color:var(--danger); border-color:rgba(228,87,75,0.45);}
+.set-msg{font-size:12px; margin:8px 0 0; min-height:16px; color:var(--recovery-text);}
+.set-msg.err{color:var(--danger);}
+.about-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-top:0.5px solid var(--border); color:var(--text-secondary);}
+.about-row:first-of-type{border-top:none;}
+.about-row b{font-weight:500; color:var(--text);}
+#hello{display:inline-block; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom;}
+#hello:not(:empty)::after{content:' · ';}
+.toast{
+  position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
+  background:var(--surface-2); color:var(--text); border:0.5px solid var(--border-strong);
+  padding:10px 16px; border-radius:12px; font-size:13px; max-width:90%;
+  opacity:0; pointer-events:none; transition:opacity .2s; z-index:50;
+}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -438,7 +470,7 @@ nav.bottombar{
 
   <div class="topbar">
     <div class="brand">FORGE<span>.</span></div>
-    <div class="streak"><i class="ic" data-ic="flame"></i> 4 วันติด</div>
+    <div class="streak"><span id="hello"></span><i class="ic" data-ic="flame"></i> 4 วันติด</div>
   </div>
 
   <main>
@@ -484,7 +516,7 @@ nav.bottombar{
             <input id="calc-age" type="number" value="28" min="10" max="90">
           </div>
           <div>
-            <label class="field-label">น้ำหนัก (กก.)</label>
+            <label class="field-label" id="calc-weight-label">น้ำหนัก (กก.)</label>
             <input id="calc-weight" type="number" value="68" min="30" max="200">
           </div>
           <div>
@@ -566,17 +598,89 @@ nav.bottombar{
       <h1 class="page-title">ตั้งค่า</h1>
       <p class="page-sub">จัดการบัญชีและการตั้งค่าแอป</p>
 
-      <div class="card settings-list">
-        <div class="settings-item"><i class="ic" data-ic="user"></i><span>บัญชีของฉัน</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
-        <div class="settings-item"><i class="ic" data-ic="bell"></i><span>การแจ้งเตือน</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
-        <div class="settings-item"><i class="ic" data-ic="ruler"></i><span>หน่วยวัด (กก. / ปอนด์)</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
-        <div class="settings-item"><i class="ic" data-ic="shield"></i><span>ความเป็นส่วนตัว</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
-        <div class="settings-item"><i class="ic" data-ic="info"></i><span>เกี่ยวกับแอป</span><span class="coming-soon-tag">เร็วๆ นี้</span></div>
+      <!-- account -->
+      <div class="card">
+        <div class="set-head"><i class="ic" data-ic="user"></i><p class="card-title">บัญชีของฉัน</p></div>
+        <p class="card-sub" style="margin-bottom:14px;">ข้อมูลนี้จะเติมลงในเครื่องคำนวณ TDEE ให้อัตโนมัติ</p>
+        <div class="set-field">
+          <label class="field-label" for="set-name">ชื่อที่แสดง</label>
+          <input id="set-name" type="text" maxlength="20" placeholder="ชื่อเล่นของคุณ" autocomplete="off">
+        </div>
+        <div class="calc-grid">
+          <div>
+            <label class="field-label" for="set-gender">เพศ</label>
+            <select id="set-gender">
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" for="set-age">อายุ</label>
+            <input id="set-age" type="number" min="10" max="90">
+          </div>
+          <div>
+            <label class="field-label" for="set-weight" id="set-weight-label">น้ำหนัก (กก.)</label>
+            <input id="set-weight" type="number" step="0.1">
+          </div>
+          <div>
+            <label class="field-label" for="set-height">ส่วนสูง (ซม.)</label>
+            <input id="set-height" type="number" min="120" max="230">
+          </div>
+        </div>
+        <button class="btn btn-accent" id="save-profile">บันทึกข้อมูล</button>
+        <p class="set-msg" id="profile-msg"></p>
       </div>
-      <p class="empty-hint">หน้านี้เป็น placeholder รอออกแบบระบบตั้งค่าจริง</p>
+
+      <!-- notifications -->
+      <div class="card">
+        <div class="set-head"><i class="ic" data-ic="bell"></i><p class="card-title">การแจ้งเตือน</p></div>
+        <div class="settings-list">
+          <div class="settings-item">
+            <span>เตือนให้ซ้อมทุกวัน</span>
+            <button class="switch" id="sw-remind" role="switch" aria-checked="false" aria-label="เตือนให้ซ้อมทุกวัน"></button>
+          </div>
+          <div class="settings-item">
+            <span>เวลาที่เตือน</span>
+            <input type="time" id="set-remind-time" value="18:00">
+          </div>
+          <div class="settings-item">
+            <span>แจ้งเมื่อกล้ามเนื้อพักครบ</span>
+            <button class="switch" id="sw-recover" role="switch" aria-checked="false" aria-label="แจ้งเมื่อกล้ามเนื้อพักครบ"></button>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="test-notif" style="margin-top:10px;">ทดสอบการแจ้งเตือน</button>
+        <p class="card-sub" id="notif-hint" style="margin:10px 0 0;">แจ้งเตือนจะทำงานเมื่อเปิดหน้าแอปค้างไว้ในเบราว์เซอร์</p>
+      </div>
+
+      <!-- units -->
+      <div class="card">
+        <div class="set-head"><i class="ic" data-ic="ruler"></i><p class="card-title">หน่วยวัด (กก. / ปอนด์)</p></div>
+        <p class="card-sub" style="margin-bottom:12px;">ใช้กับน้ำหนักในแผนซ้อมและเครื่องคำนวณ TDEE</p>
+        <div class="segment" id="unit-segment" style="margin-bottom:0;">
+          <button data-unit="kg" class="active">กิโลกรัม (กก.)</button>
+          <button data-unit="lb">ปอนด์</button>
+        </div>
+      </div>
+
+      <!-- privacy -->
+      <div class="card">
+        <div class="set-head"><i class="ic" data-ic="shield"></i><p class="card-title">ความเป็นส่วนตัว</p></div>
+        <p class="card-sub" style="margin-bottom:12px;">ข้อมูลที่ตั้งค่าไว้ถูกเก็บในเครื่องนี้เท่านั้น ไม่ได้ส่งไปที่ใด การล้างข้อมูลจะลบโปรไฟล์ หน่วยวัด และการแจ้งเตือนที่บันทึกไว้</p>
+        <button class="btn btn-ghost btn-danger" id="clear-data">ล้างข้อมูลทั้งหมดในเครื่อง</button>
+      </div>
+
+      <!-- about -->
+      <div class="card">
+        <div class="set-head"><i class="ic" data-ic="info"></i><p class="card-title">เกี่ยวกับแอป</p></div>
+        <p class="card-sub" style="margin-bottom:8px;">FORGE — ผู้ช่วยสำหรับคนเข้ายิม วางแผนซ้อม ติดตามการพัก และคำนวณพลังงานต่อวัน</p>
+        <div class="about-row"><span>เวอร์ชัน</span><b id="about-version"></b></div>
+        <div class="about-row"><span>วิธีเก็บข้อมูล</span><b>ในเครื่องนี้</b></div>
+      </div>
     </section>
 
   </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <nav class="bottombar">
     <button class="nav-item active" data-screen="plan"><i class="ic" data-ic="list"></i><span>Plan</span></button>
@@ -627,6 +731,29 @@ navItems.forEach(btn=>{
   });
 });
 
+/* ---------- settings state (saved on this device) ---------- */
+const SETTINGS_KEY = 'forge-settings-v1';
+const APP_VERSION = '1.0.0';
+const LB_PER_KG = 2.20462;
+const SETTINGS_DEFAULTS = {
+  name:'', gender:'male', age:28, weightKg:68, heightCm:172,
+  unit:'kg', remindOn:false, remindTime:'18:00', recoverOn:false, lastRemindDate:''
+};
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(raw) return Object.assign({}, SETTINGS_DEFAULTS, JSON.parse(raw));
+  }catch(e){}
+  return Object.assign({}, SETTINGS_DEFAULTS);
+}
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(S)); }catch(e){}
+}
+let S = loadSettings();
+const unitName = () => S.unit === 'lb' ? 'ปอนด์' : 'กก.';
+const toDisp = kg => Math.round((S.unit === 'lb' ? kg * LB_PER_KG : kg) * 10) / 10;
+const fromDisp = v => S.unit === 'lb' ? v / LB_PER_KG : v;
+
 /* ---------- PLAN tab ---------- */
 const planData = {
   gym: [
@@ -651,14 +778,14 @@ let currentPlan = 'gym';
 function renderPlan(){
   const wrap = document.getElementById('plan-body');
   const list = planData[currentPlan];
-  const unitLabel = currentPlan === 'gym' ? 'เซต × ครั้ง (กก.)' : currentPlan === 'cardio' ? 'รอบ / เวลา' : 'เซต / ค้างท่า';
+  const unitLabel = currentPlan === 'gym' ? `เซต × ครั้ง (${unitName()})` : currentPlan === 'cardio' ? 'รอบ / เวลา' : 'เซต / ค้างท่า';
 
   let rows = list.map((ex, i) => `
     <div class="exercise-row" data-idx="${i}">
       <div class="exercise-num">${String(i+1).padStart(2,'0')}</div>
       <div class="exercise-info">
         <div class="exercise-name">${ex.name}</div>
-        <div class="exercise-meta">${ex.sets} เซต · ${ex.reps}${ex.weight ? ' · ' + ex.weight + ' กก.' : ''}</div>
+        <div class="exercise-meta">${ex.sets} เซต · ${ex.reps}${ex.weight ? ' · ' + toDisp(ex.weight) + ' ' + unitName() : ''}</div>
       </div>
       <button class="remove-btn" data-remove="${i}" aria-label="ลบท่านี้">${ICONS.x}</button>
     </div>
@@ -767,7 +894,7 @@ setInterval(renderMuscles, 60000);
 function calcTDEE(){
   const gender = document.getElementById('calc-gender').value;
   const age = parseFloat(document.getElementById('calc-age').value) || 0;
-  const weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+  const weight = fromDisp(parseFloat(document.getElementById('calc-weight').value) || 0);
   const height = parseFloat(document.getElementById('calc-height').value) || 0;
   const activity = parseFloat(document.getElementById('calc-activity').value) || 1.2;
 
@@ -810,6 +937,204 @@ document.getElementById('chat-toggle').addEventListener('click', (e)=>{
   document.querySelectorAll('#chat-toggle .chip').forEach(c=>c.classList.toggle('active', c===chip));
   document.getElementById('chat-thread').innerHTML = chip.getAttribute('data-chat') === 'trainer' ? trainerThread : aiThread;
 });
+
+/* ---------- SETTING tab ---------- */
+const $ = id => document.getElementById(id);
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+function setMsg(text, isErr){
+  const m = $('profile-msg');
+  m.textContent = text;
+  m.classList.toggle('err', !!isErr);
+}
+
+/* units */
+function applyUnitToUI(){
+  const u = unitName();
+  $('calc-weight-label').textContent = `น้ำหนัก (${u})`;
+  $('set-weight-label').textContent = `น้ำหนัก (${u})`;
+  [$('calc-weight'), $('set-weight')].forEach(el=>{ el.min = toDisp(30); el.max = toDisp(200); });
+  document.querySelectorAll('#unit-segment button').forEach(b=>b.classList.toggle('active', b.dataset.unit === S.unit));
+}
+$('unit-segment').addEventListener('click', (e)=>{
+  const b = e.target.closest('button[data-unit]');
+  if(!b || b.dataset.unit === S.unit) return;
+  let calcKg = fromDisp(parseFloat($('calc-weight').value));
+  if(!(calcKg > 0)) calcKg = S.weightKg;
+  S.unit = b.dataset.unit;
+  saveSettings();
+  applyUnitToUI();
+  $('set-weight').value = toDisp(S.weightKg);
+  $('calc-weight').value = toDisp(calcKg);
+  calcTDEE();
+  renderPlan();
+});
+
+/* profile */
+function updateHello(){ $('hello').textContent = S.name; }
+function fillProfile(){
+  $('set-name').value = S.name;
+  $('set-gender').value = S.gender;
+  $('set-age').value = S.age;
+  $('set-weight').value = toDisp(S.weightKg);
+  $('set-height').value = S.heightCm;
+}
+function applyProfileToCalc(){
+  $('calc-gender').value = S.gender;
+  $('calc-age').value = S.age;
+  $('calc-weight').value = toDisp(S.weightKg);
+  $('calc-height').value = S.heightCm;
+  calcTDEE();
+}
+$('save-profile').addEventListener('click', ()=>{
+  const age = parseFloat($('set-age').value);
+  const wDisp = parseFloat($('set-weight').value);
+  const height = parseFloat($('set-height').value);
+  if(!(age >= 10 && age <= 90)) return setMsg('อายุต้องอยู่ระหว่าง 10–90 ปี', true);
+  if(!(wDisp >= toDisp(30) && wDisp <= toDisp(200))) return setMsg(`น้ำหนักต้องอยู่ระหว่าง ${toDisp(30)}–${toDisp(200)} ${unitName()}`, true);
+  if(!(height >= 120 && height <= 230)) return setMsg('ส่วนสูงต้องอยู่ระหว่าง 120–230 ซม.', true);
+  S.name = $('set-name').value.trim().slice(0, 20);
+  S.gender = $('set-gender').value;
+  S.age = Math.round(age);
+  S.weightKg = fromDisp(wDisp);
+  S.heightCm = Math.round(height);
+  saveSettings();
+  updateHello();
+  applyProfileToCalc();
+  setMsg('บันทึกแล้ว และอัปเดตเครื่องคำนวณ TDEE ให้เรียบร้อย', false);
+});
+['set-name','set-gender','set-age','set-weight','set-height'].forEach(id=>{
+  $(id).addEventListener('input', ()=>setMsg('', false));
+});
+
+/* notifications */
+const NOTIF_HINT = 'แจ้งเตือนจะทำงานเมื่อเปิดหน้าแอปค้างไว้ในเบราว์เซอร์';
+function refreshSwitches(){
+  $('sw-remind').setAttribute('aria-checked', S.remindOn);
+  $('sw-recover').setAttribute('aria-checked', S.recoverOn);
+  $('set-remind-time').value = S.remindTime;
+}
+function requestNotifPermission(){
+  if(!('Notification' in window)) return Promise.resolve('unsupported');
+  if(Notification.permission === 'granted' || Notification.permission === 'denied') return Promise.resolve(Notification.permission);
+  try{
+    return Promise.resolve(Notification.requestPermission()).then(p => p || Notification.permission);
+  }catch(e){ return Promise.resolve('unsupported'); }
+}
+function notify(title, body){
+  try{
+    if('Notification' in window && Notification.permission === 'granted'){
+      new Notification(title, {body});
+      return;
+    }
+  }catch(e){}
+  toast(title + ' — ' + body);
+}
+async function setNotifToggle(key, on){
+  if(on){
+    const perm = await requestNotifPermission();
+    if(perm !== 'granted'){
+      S[key] = false;
+      refreshSwitches();
+      $('notif-hint').textContent = perm === 'unsupported'
+        ? 'เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน'
+        : 'เบราว์เซอร์ยังไม่อนุญาตการแจ้งเตือน ต้องเปิดสิทธิ์ให้เว็บนี้ในการตั้งค่าเบราว์เซอร์ก่อน';
+      return;
+    }
+    $('notif-hint').textContent = NOTIF_HINT;
+  }
+  S[key] = on;
+  saveSettings();
+  refreshSwitches();
+  if(key === 'recoverOn' && on) markRecovered();
+}
+$('sw-remind').addEventListener('click', ()=>setNotifToggle('remindOn', !S.remindOn));
+$('sw-recover').addEventListener('click', ()=>setNotifToggle('recoverOn', !S.recoverOn));
+$('set-remind-time').addEventListener('change', (e)=>{
+  if(!e.target.value){ e.target.value = S.remindTime; return; }
+  S.remindTime = e.target.value;
+  S.lastRemindDate = '';
+  saveSettings();
+});
+$('test-notif').addEventListener('click', async ()=>{
+  const perm = await requestNotifPermission();
+  if(perm === 'granted') notify('FORGE', 'การแจ้งเตือนใช้งานได้ปกติ');
+  else toast('เบราว์เซอร์ยังไม่อนุญาตการแจ้งเตือน');
+});
+
+const recoverSeen = new Set();
+const muscleKey = m => m.name + '|' + m.lastTrained;
+function markRecovered(){
+  muscles.forEach(m=>{
+    if((Date.now() - m.lastTrained) / 3600000 >= REST_HOURS) recoverSeen.add(muscleKey(m));
+  });
+}
+function checkNotifications(){
+  if(S.recoverOn){
+    muscles.forEach(m=>{
+      const k = muscleKey(m);
+      if((Date.now() - m.lastTrained) / 3600000 >= REST_HOURS && !recoverSeen.has(k)){
+        recoverSeen.add(k);
+        notify('พร้อมฝึกแล้ว', `${m.name}พักครบ ${REST_HOURS} ชม. พร้อมซ้อมอีกครั้ง`);
+      }
+    });
+  }
+  if(S.remindOn && S.remindTime){
+    const now = new Date();
+    const [hh, mm] = S.remindTime.split(':').map(Number);
+    const diff = now.getHours() * 60 + now.getMinutes() - (hh * 60 + mm);
+    const today = now.toDateString();
+    if(diff >= 0 && diff < 15 && S.lastRemindDate !== today){
+      S.lastRemindDate = today;
+      saveSettings();
+      notify('ถึงเวลาซ้อมแล้ว', 'เปิด FORGE เพื่อดูแผนของวันนี้');
+    }
+  }
+}
+markRecovered();
+setInterval(checkNotifications, 30000);
+
+/* privacy: clear saved data (tap twice to confirm) */
+let clearArmed = false, clearTimer;
+function disarmClear(){
+  clearArmed = false;
+  clearTimeout(clearTimer);
+  $('clear-data').textContent = 'ล้างข้อมูลทั้งหมดในเครื่อง';
+}
+$('clear-data').addEventListener('click', ()=>{
+  if(!clearArmed){
+    clearArmed = true;
+    $('clear-data').textContent = 'แตะอีกครั้งเพื่อยืนยันการล้างข้อมูล';
+    clearTimer = setTimeout(disarmClear, 4000);
+    return;
+  }
+  disarmClear();
+  try{ localStorage.removeItem(SETTINGS_KEY); }catch(e){}
+  S = Object.assign({}, SETTINGS_DEFAULTS);
+  applyUnitToUI();
+  fillProfile();
+  applyProfileToCalc();
+  refreshSwitches();
+  updateHello();
+  setMsg('', false);
+  $('notif-hint').textContent = NOTIF_HINT;
+  renderPlan();
+  toast('ล้างข้อมูลในเครื่องแล้ว');
+});
+
+/* initial paint of settings */
+$('about-version').textContent = APP_VERSION;
+applyUnitToUI();
+fillProfile();
+applyProfileToCalc();
+refreshSwitches();
+updateHello();
 </script>
 </body>
 </html>
