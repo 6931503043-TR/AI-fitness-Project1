@@ -1,29 +1,11 @@
-# AI Fitness Coach — Agent Rules
+## AI Fitness Coach 
 
-Initial agent/quality setup:
+# Project structure
 
-- `AGENTS.md` — shared engineering rules for coding agents
-- `CLAUDE.md` — Claude-specific workflow pointer and verification behavior
-- `eslint.config.js` — JavaScript/TypeScript lint rules
-- `.github/workflows/ci.yml` — GitHub Actions quality gate
+app = source code, including screens, widgets, components, and application logic.
 
-## Important
+ai = AI-related components such as prompts, AI experiments, model configurations, and AI services.
 
-The main prototype may use Flutter/Dart. ESLint does **not** lint Dart code.
+docs = Additional documentation, technical documentation, system architecture, and detailed usage guides.
 
-For Flutter code, keep using:
-
-    flutter analyze
-    flutter test
-
-This ESLint setup is intended for JavaScript/TypeScript parts of the project, such as a web UI, backend, tooling, or AI service.
-
-## Recommended package scripts
-
-    "scripts": {
-      "lint": "eslint .",
-      "typecheck": "tsc --noEmit",
-      "test": "vitest run"
-    }
-
-If the project uses a different test runner, replace the `test` script accordingly.
+assets = icons, images, logos, fonts, and other media.
