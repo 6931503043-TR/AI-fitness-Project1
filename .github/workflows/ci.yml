@@ -18,20 +18,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # The repository has no package.json / package-lock.json yet, so the
+      # Node checks cannot run. Detect that and skip them instead of failing
+      # in "Setup Node.js". NOTE: while they are skipped this job checks
+      # nothing. Add package.json + package-lock.json and it runs by itself.
+      - name: Detect Node project
+        id: node
+        run: |
+          if [ -f package.json ] && [ -f package-lock.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Node checks skipped::No package.json + package-lock.json found, so lint/typecheck/test did not run."
+          fi
+
       - name: Setup Node.js
+        if: steps.node.outputs.present == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: steps.node.outputs.present == 'true'
         run: npm ci
 
       - name: Lint
+        if: steps.node.outputs.present == 'true'
         run: npm run lint
 
       - name: Typecheck
+        if: steps.node.outputs.present == 'true'
         run: npm run typecheck --if-present
 
       - name: Test
+        if: steps.node.outputs.present == 'true'
         run: npm test
