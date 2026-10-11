@@ -241,26 +241,6 @@ label.field-label{
   font-size:12px;
   color:var(--text-secondary);
 }
-  .muscle-block{
-  padding:12px 0;
-  border-top:0.5px solid var(--border);
-}
-.muscle-block:first-child{border-top:none;}
-.muscle-block .muscle-row{
-  padding:0 0 10px;
-  border-top:none;
-}
-.muscle-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.muscle-actions .btn{
-  width:100%;
-  position:relative;
-  z-index:1;
-  touch-action:manipulation;
-}
 .stat-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -756,43 +736,26 @@ const muscles = [
 function renderMuscles(){
   const wrap = document.getElementById('muscle-list');
   wrap.innerHTML = muscles.map((m,i)=>{
-    const ready = m.lastTrained === null;
-    const hoursSince = ready ? REST_HOURS : (Date.now() - m.lastTrained) / 3600000;
-    const pct = Math.max(0, Math.min(100, (hoursSince / REST_HOURS) * 100));
-    const recovered = pct >= 100;
+    const hoursSince = (Date.now() - m.lastTrained) / 3600000;
     const hoursLeft = Math.max(0, REST_HOURS - hoursSince);
+    const recovered = hoursLeft <= 0;
+    const pct = Math.max(0, Math.min(100, (hoursLeft / REST_HOURS) * 100));
     const color = recovered ? 'var(--recovery)' : 'var(--accent)';
     const statusText = recovered ? 'พร้อมฝึก' : `เหลือ ${hoursLeft.toFixed(0)} ชม.`;
     return `
-      <div class="muscle-block">
-        <div class="muscle-row">
-          <div class="muscle-name">${m.name}</div>
-          <div class="muscle-bar-track"><div class="muscle-bar-fill" style="width:${pct}%; background:${color};"></div></div>
-          <div class="muscle-status" style="color:${recovered?'var(--recovery-text)':'var(--text-secondary)'}">${statusText}</div>
-        </div>
-        <div class="muscle-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-reset="${i}">เริ่มใหม่</button>
-          <button type="button" class="btn btn-accent btn-sm" data-train="${i}">ฝึกแล้ว</button>
-        </div>
+      <div class="muscle-row">
+        <div class="muscle-name">${m.name}</div>
+        <div class="muscle-bar-track"><div class="muscle-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+        <div class="muscle-status" style="color:${recovered?'var(--recovery-text)':'var(--text-secondary)'}">${statusText}</div>
       </div>
+      <button class="btn btn-ghost btn-sm" style="margin:6px 0 4px; width:100%;" data-train="${i}">ฝึก${m.name}แล้ว · เริ่มนับพักใหม่</button>
     `;
   }).join('');
-}
+
   wrap.querySelectorAll('[data-train]').forEach(b=>{
     b.addEventListener('click', ()=>{
       const idx = parseInt(b.getAttribute('data-train'));
       muscles[idx].lastTrained = Date.now();
-      document.getElementById('muscle-list').addEventListener('click', (e)=>{
-  const trainBtn = e.target.closest('[data-train]');
-  const resetBtn = e.target.closest('[data-reset]');
-  if(trainBtn){
-    muscles[parseInt(trainBtn.dataset.train)].lastTrained = Date.now();
-    renderMuscles();
-  } else if(resetBtn){
-    muscles[parseInt(resetBtn.dataset.reset)].lastTrained = null;
-    renderMuscles();
-  }
-});
       renderMuscles();
     });
   });
