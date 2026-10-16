@@ -1,11 +1,14 @@
-## AI Fitness Coach 
+# Chat App
 
-# Project structure
+หน้าแชทแบบ Messenger (ไฟล์เดียว `index.html`) มีรายชื่อเพื่อน ปุ่มเพิ่มเพื่อน และปุ่ม AI chat
 
-app = source code, including screens, widgets, components, and application logic.
+## วิธีใช้
+เปิด `index.html` ในเบราว์เซอร์ได้เลย ไม่ต้องติดตั้งอะไร
 
-ai = AI-related components such as prompts, AI experiments, model configurations, and AI services.
+## หมายเหตุ
+- ข้อมูลเพื่อนและข้อความเก็บใน localStorage ของเบราว์เซอร์
+- ยังไม่มีเซิร์ฟเวอร์ ข้อความหาเพื่อนจึงเห็นเฉพาะในเครื่องตัวเอง
+- ต่อ AI จริงได้ที่ฟังก์ชัน `getAiReply` ใน `index.html`
 
-docs = Additional documentation, technical documentation, system architecture, and detailed usage guides.
-
-assets = icons, images, logos, fonts, and other media.
+## ขึ้น GitHub Pages
+Settings > Pages > Branch: main > Save
