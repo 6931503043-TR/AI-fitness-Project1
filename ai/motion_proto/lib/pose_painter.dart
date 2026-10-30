@@ -2,8 +2,9 @@ import 'dart:io' show Platform;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+
+import 'pose_stability.dart';
 
 /// แปลงพิกัด x จากภาพดิบของกล้อง ไปเป็นพิกัดบน canvas ที่วางทับ preview
 /// (ตามตัวอย่างทางการของ google_mlkit_flutter ต้องล็อกจอแนวตั้งให้ canvas ตรงกับ preview)
@@ -60,9 +61,14 @@ const _bones = <List<PoseLandmarkType>>[
   [PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle],
 ];
 
+/// วาดจุดเฉพาะข้อต่อลำตัว (ไม่วาดใบหน้า/นิ้ว/ปลายเท้า ซึ่งซ้อนทับกันมากและไม่ได้ใช้นับท่า)
+final Set<PoseLandmarkType> _jointTypes = {
+  for (final b in _bones) ...b,
+};
+
 class PosePainter extends CustomPainter {
   PosePainter({
-    required this.pose,
+    required this.points,
     required this.imageSize,
     required this.rotation,
     required this.lens,
@@ -71,7 +77,8 @@ class PosePainter extends CustomPainter {
     this.angleText,
   });
 
-  final Pose pose;
+  /// จุดที่ผ่านการกรองแล้ว (มีเฉพาะจุดที่มั่นใจพอหรือกำลังค้างค่าเดิมสั้นๆ)
+  final Map<PoseLandmarkType, LmPoint> points;
   final Size imageSize;
   final InputImageRotation rotation;
   final CameraLensDirection lens;
@@ -85,11 +92,9 @@ class PosePainter extends CustomPainter {
   /// ตัวเลขมุมที่แสดงข้างจุดหมุน
   final String? angleText;
 
-  static const _minLikelihood = 0.5;
-
   Offset? _point(PoseLandmarkType t, Size size) {
-    final l = pose.landmarks[t];
-    if (l == null || l.likelihood < _minLikelihood) return null;
+    final l = points[t];
+    if (l == null) return null;
     return Offset(
       translateX(l.x, size, imageSize, rotation, lens),
       translateY(l.y, size, imageSize, rotation, lens),
@@ -117,7 +122,7 @@ class PosePainter extends CustomPainter {
       if (p1 == null || p2 == null) continue;
       canvas.drawLine(p1, p2, faint);
     }
-    for (final t in PoseLandmarkType.values) {
+    for (final t in _jointTypes) {
       final p = _point(t, size);
       if (p != null) canvas.drawCircle(p, 3, faintDot);
     }
@@ -168,5 +173,7 @@ class PosePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PosePainter old) =>
-      old.pose != pose || old.focusColor != focusColor || old.angleText != angleText;
+      old.points != points ||
+      old.focusColor != focusColor ||
+      old.angleText != angleText;
 }
