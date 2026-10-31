@@ -2,3 +2,6 @@
 -keep class androidx.work.impl.WorkDatabase_Impl { *; }
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
 -keep class androidx.room.** { *; }
+-keep class * implements com.google.firebase.components.ComponentRegistrar { <init>(); }
+-keep class com.google.firebase.components.** { *; }
+-keep class com.google.mlkit.** { *; }
