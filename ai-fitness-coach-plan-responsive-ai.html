@@ -15,7 +15,13 @@ main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 11
 .carousel-wrap{position:relative;padding:6px 0 10px}.carousel-viewport{overflow:hidden;padding:12px 0 24px}.carousel-track{display:flex;align-items:center;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:12px max(20px,calc((100% - 360px)/2));}.carousel-track::-webkit-scrollbar{display:none}.template-card{position:relative;flex:0 0 clamp(280px,31vw,365px);height:300px;overflow:hidden;border:1px solid var(--border2);border-radius:22px;scroll-snap-align:center;isolation:isolate;background:#29271f;transition:transform .25s,border-color .25s,opacity .25s;opacity:.66;transform:scale(.91);cursor:pointer;text-align:left;padding:0;color:var(--text)}.template-card.active{opacity:1;transform:scale(1.035);border-color:rgba(255,90,31,.75);box-shadow:0 22px 55px rgba(0,0,0,.32)}.template-card:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.template-card .photo{position:absolute;inset:0;background-size:cover;background-position:center;z-index:-2;transform:scale(1.01);transition:transform .45s}.template-card:hover .photo{transform:scale(1.06)}.template-card:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.08) 8%,rgba(0,0,0,.2) 36%,rgba(0,0,0,.88) 100%)}.card-topline{position:absolute;top:17px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center}.tag{padding:7px 10px;border-radius:30px;background:rgba(15,14,11,.72);border:1px solid rgba(255,255,255,.18);font-size:10px;letter-spacing:.4px;color:#fff;backdrop-filter:blur(8px)}.tag.accent{background:var(--accent);color:#210d04;border-color:transparent;font-weight:700}.template-copy{position:absolute;left:21px;right:21px;bottom:20px}.template-kicker{font-size:10px;color:#FFD2BF;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}.template-name{font:600 35px/.98 var(--head);margin:0 0 8px;color:white}.template-desc{font-size:11px;line-height:1.5;color:rgba(255,255,255,.78);margin:0 0 14px;max-width:270px}.template-meta{display:flex;gap:13px;align-items:center;color:rgba(255,255,255,.88);font-size:10px}.template-meta span{display:flex;align-items:center;gap:5px}.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;background:rgba(30,28,23,.94);border:1px solid var(--border2);color:var(--text);font-size:20px;display:grid;place-items:center}.carousel-arrow:hover{border-color:var(--accent);color:var(--accent)}.carousel-arrow.prev{left:4px}.carousel-arrow.next{right:4px}.carousel-dots{display:flex;justify-content:center;gap:7px;margin-top:-3px}.dot{width:6px;height:6px;border-radius:10px;background:#5E594E;border:0;padding:0}.dot.active{width:22px;background:var(--accent)}
 .below-carousel{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:18px;margin-top:26px}.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.panel-heading{font:600 25px var(--head);margin:0 0 5px}.panel-sub{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 17px}.type-list{display:flex;gap:9px;flex-wrap:wrap}.type-chip{border:1px solid var(--border2);background:var(--surface2);color:var(--muted);padding:10px 15px;border-radius:10px;font-size:12px}.type-chip.active{border-color:var(--accent);color:#FFD0BC;background:var(--accent-soft)}.create-panel{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(120deg,rgba(255,90,31,.13),rgba(255,90,31,.025)),var(--surface)}.create-copy{min-width:0}.create-copy .panel-heading{margin-bottom:5px}.create-icon{width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:25px;flex:none}.create-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
 /* details */
-.back{display:inline-flex;gap:8px;align-items:center;background:none;border:0;color:var(--muted);font-size:12px;padding:0;margin-bottom:22px}.back:hover{color:var(--text)}.detail-hero{min-height:270px;border-radius:22px;overflow:hidden;position:relative;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:30px;margin-bottom:24px;border:1px solid var(--border2)}.detail-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.84),rgba(0,0,0,.28)),linear-gradient(0deg,rgba(0,0,0,.55),transparent)}.detail-hero-content{position:relative;max-width:620px}.detail-hero h2{font:600 clamp(36px,5vw,52px)/.95 var(--head);margin:8px 0}.detail-hero p{color:rgba(255,255,255,.78);font-size:13px;line-height:1.6;margin:0}.detail-stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;color:#eee;font-size:11px}.detail-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.8fr);gap:18px;align-items:start}.focus-panel,.info-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.focus-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:17px}.focus-option{min-height:86px;border:1px solid var(--border2);border-radius:13px;background:var(--surface2);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;transition:.16s}.focus-option .muscle-icon{font-size:23px;color:#A7A296}.focus-option.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}.focus-option.selected .muscle-icon{color:var(--accent)}.selection-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:20px;padding-top:17px;border-top:1px solid var(--border)}.selection-count{font-size:11px;color:var(--muted)}.info-row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);font-size:12px}.info-row:last-child{border:0}.info-row span:first-child{color:var(--muted)}.info-row strong{font-weight:600;text-align:right}.note{font-size:11px;line-height:1.6;color:var(--quiet);margin:13px 0 0}
+.back{display:inline-grid;place-items:center;width:68px;height:46px;padding:0;margin-bottom:22px;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;color:var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.28);transition:background .18s,border-color .18s,color .18s,transform .12s,box-shadow .18s}
+.back .back-arrow{display:block;flex:none;transition:transform .18s}
+.back:hover{background:var(--accent);border-color:var(--accent);color:#1B0A03;box-shadow:0 6px 18px rgba(255,90,31,.32)}
+.back:hover .back-arrow{transform:translateX(-4px)}
+.back:active{transform:scale(.92)}
+@media(max-width:650px){.back{width:72px;height:48px}}
+.detail-hero{min-height:270px;border-radius:22px;overflow:hidden;position:relative;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:30px;margin-bottom:24px;border:1px solid var(--border2)}.detail-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.84),rgba(0,0,0,.28)),linear-gradient(0deg,rgba(0,0,0,.55),transparent)}.detail-hero-content{position:relative;max-width:620px}.detail-hero h2{font:600 clamp(36px,5vw,52px)/.95 var(--head);margin:8px 0}.detail-hero p{color:rgba(255,255,255,.78);font-size:13px;line-height:1.6;margin:0}.detail-stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;color:#eee;font-size:11px}.detail-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.8fr);gap:18px;align-items:start}.focus-panel,.info-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.focus-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:17px}.focus-option{min-height:86px;border:1px solid var(--border2);border-radius:13px;background:var(--surface2);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;transition:.16s}.focus-option .muscle-icon{font-size:23px;color:#A7A296}.focus-option.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}.focus-option.selected .muscle-icon{color:var(--accent)}.selection-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:20px;padding-top:17px;border-top:1px solid var(--border)}.selection-count{font-size:11px;color:var(--muted)}.info-row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);font-size:12px}.info-row:last-child{border:0}.info-row span:first-child{color:var(--muted)}.info-row strong{font-weight:600;text-align:right}.note{font-size:11px;line-height:1.6;color:var(--quiet);margin:13px 0 0}
 /* AI preview */
 .ai-banner{display:flex;align-items:center;gap:14px;padding:17px 19px;background:var(--mint-soft);border:1px solid rgba(85,199,181,.25);border-radius:15px;margin:17px 0 20px}.ai-mark{width:38px;height:38px;border-radius:12px;background:rgba(85,199,181,.15);display:grid;place-items:center;color:var(--mint);font-size:20px;flex:none}.ai-banner strong{display:block;font-size:13px;margin-bottom:4px}.ai-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}.ai-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.65fr);gap:18px}.exercise-list{display:flex;flex-direction:column}.exercise-item{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--border)}.exercise-item:last-child{border:0}.exercise-number{font:600 23px var(--head);color:var(--quiet);width:25px}.exercise-art{width:52px;height:48px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;font-size:22px;flex:none}.exercise-text{flex:1;min-width:0}.exercise-text strong{display:block;font-size:12px;margin-bottom:4px}.exercise-text small{font-size:10px;color:var(--muted)}.volume{font-size:11px;color:var(--muted);text-align:right}.summary-metric{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:12px}.summary-metric:last-child{border:0}.summary-metric span{color:var(--muted)}.summary-metric strong{font-weight:600}.actions-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:19px}
 /* builder / my plans */
@@ -155,7 +161,7 @@ main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 11
     </section>
 
     <section id="screen-medical" class="screen">
-      <button class="back" data-back="home">← กลับไปหน้า Plan</button>
+      <button class="back" data-back="home" aria-label="กลับไปหน้า Plan" title="กลับไปหน้า Plan"><svg class="back-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
       <div class="page-head">
         <div><div class="eyebrow">AI-ASSISTED PLAN BUILDER</div><h1 class="page-title">Create with AI</h1><p class="page-sub">ให้ AI ช่วยจัดทำร่าง Workout Plan จากเป้าหมาย ข้อมูลร่างกาย และข้อจำกัดที่แพทย์ระบุ โดยไม่ตีความหรือแทนที่คำสั่งแพทย์</p></div>
       </div>
@@ -215,7 +221,7 @@ main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 11
     </section>
 
     <section id="screen-detail" class="screen">
-      <button class="back" data-back="home">← กลับไปหน้า Plan</button>
+      <button class="back" data-back="home" aria-label="กลับไปหน้า Plan" title="กลับไปหน้า Plan"><svg class="back-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
       <div class="detail-hero" id="detail-hero"><div class="detail-hero-content"><span class="tag accent" id="detail-category">GYM TEMPLATE</span><h2 id="detail-title">Full Body Foundation</h2><p id="detail-description"></p><div class="detail-stats" id="detail-stats"></div></div></div>
       <div class="detail-layout">
         <section class="focus-panel">
@@ -228,7 +234,7 @@ main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 11
     </section>
 
     <section id="screen-ai" class="screen">
-      <button class="back" data-back="detail">← กลับไปเลือก Body Focus</button>
+      <button class="back" data-back="detail" aria-label="กลับไปเลือก Body Focus" title="กลับไปเลือก Body Focus"><svg class="back-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
       <div class="page-head"><div><div class="eyebrow">PERSONALIZED PREVIEW</div><h1 class="page-title">Your Adjusted Plan</h1><p class="page-sub">ตัวอย่างหน้าผลลัพธ์หลัง AI นำ Body Focus และข้อมูลผู้ใช้มาพิจารณา</p></div><span class="tag" id="ai-tag" style="color:var(--mint);border-color:rgba(85,199,181,.35)">DEMO PREVIEW</span></div>
       <div class="ai-banner"><div class="ai-mark">✦</div><div style="flex:1;min-width:0"><strong id="ai-banner-title">AI adjustment preview</strong><p id="ai-banner-text"></p></div><button class="btn small" id="ai-connect-inline" hidden>Connect AI</button></div>
       <div class="ai-layout"><section class="panel"><div class="section-head" style="margin:0 0 12px"><div><h2 class="section-title">Workout Breakdown</h2><p class="section-note" id="ai-focus-label"></p></div><span class="tag">SAMPLE</span></div><div class="exercise-list" id="ai-exercises"></div><div class="medical-info" id="ai-rationale" hidden></div></section><aside class="panel"><h3 class="panel-heading">Adjustment Summary</h3><p class="panel-sub">ปัจจัยที่ระบบควรนำมาพิจารณา</p><div class="summary-metric"><span>Selected focus</span><strong id="summary-focus">—</strong></div><div class="summary-metric"><span>Available time</span><strong id="summary-time">45 min · ตัวอย่าง</strong></div><div class="summary-metric"><span>Training history</span><strong>ต้องใช้ข้อมูลผู้ใช้</strong></div><div class="summary-metric"><span>Fatigue / Recovery</span><strong>ต้องใช้ข้อมูลผู้ใช้</strong></div><div class="summary-metric"><span>Limitations</span><strong>ต้องตรวจสอบ</strong></div><p class="note">ไม่มีการรับรองความปลอดภัยทางการแพทย์จาก AI ในหน้าจอตัวอย่างนี้ แผนจริงอาจต้องผ่าน Trainer Review ตาม Workflow ของโปรเจกต์</p></aside></div>
@@ -236,7 +242,7 @@ main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 11
     </section>
 
     <section id="screen-builder" class="screen">
-      <button class="back" data-back="home" id="builder-back">← กลับไปหน้า Plan</button>
+      <button class="back" data-back="home" id="builder-back" aria-label="กลับไปหน้า Plan" title="กลับไปหน้า Plan"><svg class="back-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
       <div class="page-head"><div><div class="eyebrow">PLAN BUILDER</div><h1 class="page-title" id="builder-title">Customize Plan</h1><p class="page-sub" id="builder-sub">ปรับรายละเอียดท่าออกกำลังกาย แล้วบันทึกเป็นแผนของคุณ</p></div></div>
       <div class="builder-layout"><section class="builder-list"><div class="section-head" style="margin:0 0 10px"><div><h2 class="section-title">Exercises</h2><p class="section-note">แก้ไขชื่อท่า จำนวนเซต และจำนวนครั้งต่อเซตได้</p></div><span class="tag" id="builder-source">CUSTOM</span></div><div class="builder-legend"><span><b>เซต (Sets)</b> = จำนวนรอบที่ทำ</span><span><b>ครั้ง (Reps)</b> = จำนวนครั้งต่อ 1 เซต หรือเวลา เช่น 10, 8-12, 30 sec</span><span>ตัวอย่าง: <em>3 เซต × 10 ครั้ง</em> = ทำ 10 ครั้ง พัก แล้วทำซ้ำรวม 3 รอบ</span></div><div id="builder-exercises"></div><div class="add-row"><label class="cell"><span class="cell-label">ชื่อท่าใหม่</span><input id="new-exercise" placeholder="เช่น Lat Pulldown" aria-label="Exercise name"></label><label class="cell"><span class="cell-label">เซต<small>Sets</small></span><input id="new-sets" type="number" inputmode="numeric" min="1" value="3" aria-label="Sets"></label><label class="cell"><span class="cell-label">ครั้ง<small>Reps</small></span><input id="new-reps" placeholder="10 หรือ 8-12" value="10" aria-label="Reps"></label><button class="btn small" id="add-exercise">＋ เพิ่มท่า</button></div>
 <div class="ai-assist"><div class="eyebrow" style="color:var(--mint)">AI ASSISTANT</div><h3 class="panel-heading" style="margin-top:4px">ให้ AI ช่วยปรับแผนนี้</h3><p class="panel-sub" style="margin-bottom:0">บอกสิ่งที่อยากเปลี่ยน AI จะเสนอรายการใหม่ให้ดูก่อน แล้วคุณเลือกว่าจะใช้หรือไม่</p>
@@ -499,7 +505,7 @@ function aiErrorMessage(e){
     network:'เชื่อมต่อผู้ให้บริการไม่ได้ — ตรวจอินเทอร์เน็ต หรือเซิร์ฟเวอร์ปลายทางไม่อนุญาตให้เว็บนี้เรียก (CORS)',
     timeout:'AI ใช้เวลานานเกินไป ลองใหม่อีกครั้ง',
     blocked:'ผู้ให้บริการปฏิเสธคำขอนี้'+d,
-    parse:'อ่านคำตอบของ AI ไม่ได้ — โมเดลไม่ได้ตอบเป็น JSON ตามที่ระบบต้องการ ลองกดอีกครั้ง หรือเปลี่ยนไปใช้โมเดลที่ใหญ่ขึ้น'+(e.detail?` · AI ตอบว่า: "${e.detail}"`:''),
+    parse:'อ่านคำตอบของ AI ไม่ได้ — โมเดลตอบเป็น JSON ผิดรูปแบบ ลองกดอีกครั้ง หรือเปลี่ยนไปใช้โมเดลที่ใหญ่ขึ้น'+(e.where?` · ตำแหน่งที่ผิด: ${e.where}`:'')+(e.detail?` · ต้นคำตอบ: "${e.detail}"`:''),
     truncated:'คำตอบของ AI ถูกตัดกลางคันเพราะยาวเกินขีดจำกัด ลองใหม่ หรือเลือกโมเดลที่ใหญ่ขึ้น',
     shape:'AI ตอบกลับมา แต่รูปแบบข้อมูลไม่ตรงกับที่ระบบต้องการ (ไม่พบรายการท่า) ลองใหม่อีกครั้ง หรือเปลี่ยนโมเดล'+(e.detail?` · AI ตอบว่า: "${e.detail}"`:''),
     http:'ผู้ให้บริการตอบกลับด้วยข้อผิดพลาด'+d
@@ -575,13 +581,53 @@ function aiFirstObject(s){
   }
   return{text:s.slice(a),complete:false};
 }
+/* Repairs the two most common slips of smaller models inside strings: raw line breaks/tabs and unescaped inner quotes (e.g. Thai text like: ท่า "Push-up" ...) */
+function aiRepairJSON(s){
+  let out='',inStr=false,esc=false;
+  for(let i=0;i<s.length;i++){
+    const ch=s[i];
+    if(!inStr){out+=ch;if(ch==='"')inStr=true;continue}
+    if(esc){out+=ch;esc=false;continue}
+    if(ch==='\\'){out+=ch;esc=true;continue}
+    if(ch==='"'){
+      let j=i+1;while(j<s.length&&/\s/.test(s[j]))j++;
+      const nx=s[j];
+      if(nx===undefined||nx===','||nx==='}'||nx===']'||nx===':'){out+=ch;inStr=false}else out+='\\"';
+      continue;
+    }
+    if(ch==='\n'){out+='\\n';continue}
+    if(ch==='\r')continue;
+    if(ch==='\t'){out+='\\t';continue}
+    out+=ch;
+  }
+  return out;
+}
 function parseAIJson(text){
   const raw=String(text);
   const s=raw.replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/i,'').trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
+  const fixTrail=t=>t.replace(/,\s*([}\]])/g,'$1');
+  let where='';
+  const attempt=t=>{
+    for(const c of [t,fixTrail(t)]){
+      try{return{ok:true,v:JSON.parse(c)}}
+      catch(e){
+        if(!where){const m=/position (\d+)/.exec(e.message||'');where=m?`ใกล้ "${c.slice(Math.max(0,+m[1]-30),+m[1]+30).replace(/\s+/g,' ')}"`:String(e.message||'').slice(0,100)}
+      }
+    }
+    return{ok:false};
+  };
   const o=aiFirstObject(s);
-  if(!o)throw new AIError(aiTrunc?'truncated':'parse',aiSnip(raw));
-  for(const cand of [o.text,o.text.replace(/,\s*([}\]])/g,'$1')]){try{return JSON.parse(cand)}catch(e){}}
-  throw new AIError((aiTrunc||!o.complete)?'truncated':'parse',aiSnip(raw));
+  if(o&&o.complete){const r=attempt(o.text);if(r.ok)return r.v}
+  const start=s.indexOf('{');
+  let o2=null;
+  if(start>=0){
+    o2=aiFirstObject(aiRepairJSON(s.slice(start)));
+    if(o2&&o2.complete){const r=attempt(o2.text);if(r.ok)return r.v}
+  }
+  const last=o2||o;
+  const err=new AIError((aiTrunc||(last&&!last.complete))?'truncated':'parse',aiSnip(raw));
+  err.where=where;
+  throw err;
 }
 const aiJSON=async(system,user,task)=>parseAIJson(await callLLM(system,user,task));
 function cleanEx(x){
