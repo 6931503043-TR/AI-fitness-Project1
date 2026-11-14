@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f7fb" />
+  <title>AI Fitness Coach · Body Status</title>
+  <style>
+    :root {
+      --bg: #f3f6fa;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fc;
+      --ink: #172b45;
+      --muted: #718096;
+      --line: #e4eaf1;
+      --blue: #3989e8;
+      --blue-dark: #2477d2;
+      --blue-soft: #eaf3ff;
+      --green: #2fa477;
+      --amber: #dca044;
+      --red: #d65f64;
+      --shadow: 0 10px 30px rgba(31, 55, 86, .055);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(100% - 32px, 980px); margin: 28px auto 56px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 46px; height: 46px; display: grid; place-items: center; color: var(--blue-dark); background: #dcecff; border-radius: 15px; }
+    .brand-mark svg { width: 24px; height: 24px; }
+    .eyebrow { margin: 0 0 2px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin: 0; font-size: 25px; letter-spacing: -.035em; }
+    h2 { margin: 0; font-size: 21px; letter-spacing: -.025em; }
+    h3 { margin: 0; font-size: 15px; }
+    .demo-pill { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 999px; background: #e7f6ee; color: #217a54; font-size: 11px; font-weight: 750; white-space: nowrap; }
+    .demo-pill::before { content: ""; width: 7px; height: 7px; background: #37a66f; border-radius: 50%; }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 14px; margin: 25px 2px 13px; }
+    .section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .date-chip { display: inline-flex; align-items: center; gap: 7px; color: #60748c; font-size: 12px; white-space: nowrap; }
+    .date-chip svg { width: 15px; height: 15px; }
+    .card { background: var(--surface); border: 1px solid rgba(224, 232, 241, .8); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+    .card + .card { margin-top: 14px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .card-sub { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .tiny-label { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    .view-pill { background: #eef5fd; color: #397dc0; padding: 6px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .06em; }
+
+    /* Body map */
+    .body-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(230px, .9fr); gap: 20px; align-items: center; }
+    .body-stage { min-height: 365px; display: grid; place-items: center; background: var(--surface-soft); border-radius: 16px; padding: 12px; overflow: hidden; }
+    .body-svg { display: block; width: min(100%, 285px); height: 340px; }
+    .body-base { fill: #dfe7f0; stroke: #91a4b9; stroke-width: 2; stroke-linejoin: round; }
+    .body-region { fill: #d5e1ed; stroke: #91a4b9; stroke-width: 1.5; stroke-linejoin: round; transition: fill .2s, opacity .2s; cursor: pointer; }
+    .body-region:hover { fill: #9bc7f4; }
+    .body-region.active { fill: var(--blue); stroke: #216fbd; }
+    .body-region.muted-region { fill: #d5e1ed; }
+    .body-map-note { margin: 8px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
+    .map-side { display: flex; flex-direction: column; gap: 15px; }
+    .selector-label { font-size: 11px; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+    .area-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .area-btn { min-height: 38px; border: 1px solid #dce5ef; background: #fff; border-radius: 11px; color: #63768c; font-size: 11px; font-weight: 700; transition: .18s ease; }
+    .area-btn:hover { border-color: #9bc4ef; color: var(--blue-dark); }
+    .area-btn.active { background: var(--blue-dark); border-color: var(--blue-dark); color: white; box-shadow: 0 5px 12px rgba(36,119,210,.18); }
+    .selected-info { border: 1px solid #e3ebf4; background: #f8fafc; border-radius: 14px; padding: 14px; }
+    .selected-info .label { color: var(--muted); font-size: 10px; }
+    .selected-info strong { display: block; margin-top: 2px; font-size: 18px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 9px 13px; color: var(--muted); font-size: 10px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot.blue { background: var(--blue); }
+    .dot.grey { background: #cbd6e2; }
+
+    /* Metrics */
+    .status-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .status-badge { padding: 6px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .status-badge.low { background: #e8f6ef; color: #26835a; }
+    .status-badge.medium { background: #fff4df; color: #9b6b16; }
+    .status-badge.high { background: #ffebec; color: #b94c54; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .metric { background: #f5f8fb; border: 1px solid #edf1f5; border-radius: 14px; padding: 14px; }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 10px; }
+    .metric-value { margin: 6px 0 9px; font-size: 25px; line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+    .track { background: #e3eaf1; height: 7px; border-radius: 999px; overflow: hidden; }
+    .track > span { display: block; height: 100%; border-radius: inherit; transition: width .25s ease; }
+    .fatigue-fill { background: var(--amber); }
+    .recovery-fill { background: var(--green); }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 2px 0; font-size: 12px; }
+    .detail-row span { color: var(--muted); }
+    .detail-row strong { font-size: 12px; }
+    .insight { display: flex; gap: 10px; background: #edf5ff; border: 1px solid #e1efff; border-radius: 14px; padding: 13px; margin-top: 15px; }
+    .insight-icon { flex: 0 0 26px; width: 26px; height: 26px; display: grid; place-items: center; background: #dcecff; border-radius: 9px; color: var(--blue-dark); }
+    .insight p { margin: 4px 0 0; color: #526b85; font-size: 11px; line-height: 1.55; }
+
+    /* Hydration */
+    .hydration-card { padding: 21px; }
+    .goal-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .goal-amount { font-size: clamp(26px, 5vw, 34px); font-weight: 850; letter-spacing: -.045em; color: var(--blue-dark); }
+    .goal-amount small { color: var(--muted); font-size: 13px; font-weight: 550; letter-spacing: 0; }
+    .progress-shell { height: 15px; border-radius: 999px; background: #e4edf6; overflow: hidden; margin: 11px 0 7px; }
+    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #4ca4f3, #277ed7); transition: width .25s ease; }
+    .progress-caption { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .divider { height: 1px; background: var(--line); margin: 17px 0; }
+    .goal-breakdown { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+    .goal-tile { background: #f5f8fb; border: 1px solid #edf1f5; border-radius: 14px; padding: 13px; }
+    .goal-tile .tile-label { color: var(--muted); font-size: 10px; }
+    .goal-tile strong { display: block; margin: 4px 0 1px; font-size: 21px; letter-spacing: -.03em; }
+    .goal-tile small { color: var(--muted); font-size: 10px; }
+    .form-label { display: block; color: var(--muted); font-size: 11px; font-weight: 750; margin: 14px 0 8px; }
+    .quick-add { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+    .btn { display: inline-flex; justify-content: center; align-items: center; gap: 7px; min-height: 42px; border-radius: 12px; border: 1px solid #dce5ef; background: white; color: #526a83; font-size: 12px; font-weight: 750; padding: 9px 13px; transition: .16s ease; }
+    .btn:hover:not(:disabled) { border-color: #8dbbea; color: var(--blue-dark); transform: translateY(-1px); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.primary { background: var(--blue-dark); color: white; border-color: var(--blue-dark); }
+    .btn.primary:hover:not(:disabled) { background: #1d68bb; color: white; }
+    .btn.danger-ghost { border: 0; background: transparent; color: #a0adba; min-height: 30px; padding: 5px 8px; }
+    .btn.danger-ghost:hover { color: #c74e58; background: #fff0f1; }
+    .custom-row { display: flex; gap: 9px; }
+    .input-wrap { position: relative; flex: 1; }
+    .input-wrap input { width: 100%; min-height: 43px; border: 1px solid #dce5ef; background: #fff; border-radius: 12px; padding: 0 49px 0 13px; color: var(--ink); outline: none; font-size: 12px; }
+    .input-wrap input:focus { border-color: #82b7ec; box-shadow: 0 0 0 3px rgba(57,137,232,.11); }
+    .input-wrap .unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; pointer-events: none; }
+    .history-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 9px; }
+    .entry-count { color: #397dc0; background: #eef5fd; border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 800; }
+    .history-list { display: flex; flex-direction: column; gap: 7px; }
+    .history-entry { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid #edf1f5; background: #fbfcfe; border-radius: 12px; }
+    .entry-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .glass-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: #eaf3ff; color: #3188d6; flex: 0 0 auto; }
+    .entry-name { color: #52677e; font-size: 11px; font-weight: 650; }
+    .entry-time { color: #9aa7b5; display: block; font-size: 9px; margin-top: 1px; }
+    .entry-right { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .entry-amount { color: #314b65; font-size: 11px; font-weight: 800; }
+    .empty-state { text-align: center; color: var(--muted); padding: 18px 8px; font-size: 11px; border: 1px dashed #dce5ef; border-radius: 12px; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; font-size: 12px; }
+    .total-row span { color: var(--muted); }
+
+    /* Charts */
+    .chart-card { padding: 20px; }
+    .chart-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 5px; }
+    .chart-title p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .chart-icon { color: var(--blue); width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: #edf5ff; }
+    .chart-wrap { width: 100%; overflow: hidden; }
+    .chart-svg { display: block; width: 100%; height: auto; min-height: 170px; }
+    .chart-grid { stroke: #e9eef4; stroke-width: 1; }
+    .chart-axis { fill: #96a4b3; font-size: 10px; }
+    .chart-line-blue { fill: none; stroke: #3989e8; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-line-grey { fill: none; stroke: #9eafc2; stroke-width: 2.4; stroke-dasharray: 5 5; stroke-linecap: round; }
+    .chart-line-green { fill: none; stroke: #2fa477; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-line-amber { fill: none; stroke: #dca044; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+    .chart-dot { fill: white; stroke: #3989e8; stroke-width: 2; }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .legend-line { width: 17px; height: 3px; display: inline-block; border-radius: 4px; margin-right: 5px; vertical-align: middle; }
+    .period-toggle { display: inline-flex; padding: 3px; border: 1px solid #e2e9f1; border-radius: 10px; background: #f7f9fc; gap: 3px; }
+    .period-toggle button { border: 0; border-radius: 7px; padding: 6px 9px; color: #7a8b9e; background: transparent; font-size: 10px; font-weight: 750; }
+    .period-toggle button.active { color: #246fbf; background: white; box-shadow: 0 1px 4px rgba(20,45,75,.1); }
+    .footnote { margin: 11px 0 0; color: #8b99a8; font-size: 10px; line-height: 1.5; }
+    .footer { display: flex; justify-content: center; align-items: center; gap: 7px; color: #8b99a8; font-size: 10px; padding: 22px 0 0; }
+    .notice { margin-top: 15px; border: 1px solid #f2e5c9; background: #fff9ed; border-radius: 13px; padding: 11px 13px; color: #80652e; font-size: 10px; line-height: 1.55; }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); padding: 10px 15px; border-radius: 999px; background: #172b45; color: white; font-size: 11px; box-shadow: 0 8px 24px rgba(0,0,0,.18); opacity: 0; pointer-events: none; transition: .22s ease; z-index: 10; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 700px) {
+      .app { width: min(100% - 22px, 520px); margin-top: 16px; }
+      .topbar { margin-bottom: 20px; }
+      h1 { font-size: 22px; }
+      .card { padding: 15px; border-radius: 17px; }
+      .body-layout { grid-template-columns: 1fr; gap: 14px; }
+      .body-stage { min-height: 330px; }
+      .body-svg { height: 315px; }
+      .map-side { gap: 12px; }
+      .section-heading { margin-top: 21px; }
+      .chart-card, .hydration-card { padding: 16px; }
+    }
+    @media (max-width: 390px) {
+      .demo-pill { font-size: 9px; padding: 6px 8px; }
+      .brand-mark { width: 40px; height: 40px; }
+      .area-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .goal-top { align-items: flex-start; flex-direction: column; gap: 0; }
+      .progress-caption { gap: 8px; }
+      .metric-value { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5M6 5l2 4m10-4-2 4M7 10c-1.5 2-2 5-1 8m11-8c1.5 2 2 5 1 8M8 10c1.2 1 2.4 1.5 4 1.5s2.8-.5 4-1.5M8 18c1.2 1 2.5 1.5 4 1.5s2.8-.5 4-1.5M12 11.5V21"/></svg>
+        </div>
+        <div><p class="eyebrow">AI FITNESS COACH</p><h1>Body Status</h1></div>
+      </div>
+      <span class="demo-pill">Interactive prototype</span>
+    </header>
+
+    <section aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div><h2 id="overview-title">Body Overview</h2><p>Your body condition at a glance</p></div>
+        <div class="date-chip" id="today-label"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Muscle Map</h3><div class="card-sub">Select a body area to see its details</div></div><span class="view-pill" id="view-label">FRONT VIEW</span></div>
+        <div class="body-layout">
+          <div>
+            <div class="body-stage" id="body-stage">
+              <svg id="front-map" class="body-svg" viewBox="0 0 260 310" role="img" aria-label="Front view body muscle map">
+                <circle class="body-base" cx="130" cy="25" r="18" />
+                <path class="body-base" d="M120 44 L120 55 L140 55 L140 44 Z" />
+                <path class="body-base" d="M99 57 Q82 57 72 70 L62 112 Q60 120 69 123 L79 118 L91 83 L101 72 Z" />
+                <path class="body-base" d="M161 57 Q178 57 188 70 L198 112 Q200 120 191 123 L181 118 L169 83 L159 72 Z" />
+                <path class="body-base" d="M68 123 L78 119 L79 145 L69 151 Z M192 119 L202 123 L191 151 L181 145 Z" />
+                <path class="body-base" d="M98 57 Q109 51 130 54 Q151 51 162 57 L174 78 L166 142 Q160 153 130 153 Q100 153 94 142 L86 78 Z" />
+                <path class="body-region" data-area="Chest" d="M94 69 Q109 58 130 65 Q151 58 166 69 L160 100 Q145 107 130 104 Q115 107 100 100 Z" />
+                <path class="body-region" data-area="Core" d="M100 103 Q115 109 130 106 Q145 109 160 103 L158 140 Q145 149 130 147 Q115 149 102 140 Z" />
+                <path class="body-region" data-area="Arms" d="M99 57 Q82 57 72 70 L62 112 Q60 120 69 123 L79 118 L91 83 L101 72 Z M161 57 Q178 57 188 70 L198 112 Q200 120 191 123 L181 118 L169 83 L159 72 Z M68 123 L78 119 L79 145 L69 151 Z M192 119 L202 123 L191 151 L181 145 Z" />
+                <path class="body-region" data-area="Legs" d="M96 148 L128 151 L122 222 L113 283 Q105 290 91 285 L93 222 Z M132 151 L164 148 L167 222 L169 285 Q155 290 147 283 L138 222 Z M91 285 L112 285 L110 300 L85 300 Q80 294 91 285 Z M148 285 L169 285 L179 300 L154 300 Q149 294 148 285 Z" />
+              </svg>
+              <svg id="back-map" class="body-svg" viewBox="0 0 260 310" role="img" aria-label="Back view body muscle map" hidden>
+                <circle class="body-base" cx="130" cy="25" r="18" />
+                <path class="body-base" d="M120 44 L120 55 L140 55 L140 44 Z" />
+                <path class="body-base" d="M99 57 Q82 57 72 70 L62 112 Q60 120 69 123 L79 118 L91 83 L101 72 Z" />
+                <path class="body-base" d="M161 57 Q178 57 188 70 L198 112 Q200 120 191 123 L181 118 L169 83 L159 72 Z" />
+                <path class="body-base" d="M68 123 L78 119 L79 145 L69 151 Z M192 119 L202 123 L191 151 L181 145 Z" />
+                <path class="body-base" d="M98 57 Q109 51 130 54 Q151 51 162 57 L174 78 L166 142 Q160 153 130 153 Q100 153 94 142 L86 78 Z" />
+                <path class="body-region" data-area="Back" d="M99 61 Q112 56 130 61 Q148 56 161 61 L166 91 Q151 105 130 111 Q109 105 94 91 Z" />
+                <path class="body-region" data-area="Core" d="M98 108 Q113 114 130 114 Q147 114 162 108 L158 143 Q145 150 130 148 Q115 150 102 143 Z" />
+                <path class="body-region" data-area="Arms" d="M99 57 Q82 57 72 70 L62 112 Q60 120 69 123 L79 118 L91 83 L101 72 Z M161 57 Q178 57 188 70 L198 112 Q200 120 191 123 L181 118 L169 83 L159 72 Z M68 123 L78 119 L79 145 L69 151 Z M192 119 L202 123 L191 151 L181 145 Z" />
+                <path class="body-region" data-area="Legs" d="M96 148 L128 151 L122 222 L113 283 Q105 290 91 285 L93 222 Z M132 151 L164 148 L167 222 L169 285 Q155 290 147 283 L138 222 Z M91 285 L112 285 L110 300 L85 300 Q80 294 91 285 Z M148 285 L169 285 L179 300 L154 300 Q149 294 148 285 Z" />
+              </svg>
+            </div>
+            <p class="body-map-note">Blue highlight indicates the selected muscle group.</p>
+          </div>
+          <div class="map-side">
+            <div><div class="selector-label">SELECT BODY FOCUS</div>
+              <div class="area-grid" id="area-buttons">
+                <button class="area-btn active" data-area="Chest">Chest</button>
+                <button class="area-btn" data-area="Back">Back</button>
+                <button class="area-btn" data-area="Arms">Arms</button>
+                <button class="area-btn" data-area="Core">Core</button>
+                <button class="area-btn" data-area="Legs">Legs</button>
+              </div>
+            </div>
+            <div class="selected-info"><div class="label">SELECTED AREA</div><strong id="selected-area">Chest</strong></div>
+            <div class="legend"><span class="legend-item"><i class="dot blue"></i>Selected area</span><span class="legend-item"><i class="dot grey"></i>Other areas</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="part-info-title">
+      <div class="section-heading"><div><h2 id="part-info-title">Specific Part Info</h2><p>Muscle condition and recovery information</p></div></div>
+      <div class="card">
+        <div class="status-row"><div><h3 id="part-name">Chest Status</h3><div class="card-sub">Selected muscle group</div></div><span class="status-badge medium" id="fatigue-badge">Moderate Fatigue</span></div>
+        <div class="metric-grid">
+          <div class="metric"><div class="metric-top"><span>Fatigue Level</span><span>↗</span></div><div class="metric-value" id="fatigue-value">42%</div><div class="track"><span class="fatigue-fill" id="fatigue-bar" style="width:42%"></span></div></div>
+          <div class="metric"><div class="metric-top"><span>Recovery Estimate</span><span>↗</span></div><div class="metric-value" id="recovery-value">58%</div><div class="track"><span class="recovery-fill" id="recovery-bar" style="width:58%"></span></div></div>
+        </div>
+        <div class="detail-row"><span>Last Training</span><strong id="last-training">Yesterday</strong></div>
+        <div class="detail-row"><span>Training Status</span><strong id="training-status">Moderate Load</strong></div>
+        <div class="insight"><div class="insight-icon">✦</div><div><h3 style="font-size:12px">AI Coach Insight</h3><p id="coach-insight">This muscle group has moderate fatigue. Consider monitoring recovery before increasing training intensity.</p></div></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="hydration-title">
+      <div class="section-heading"><div><h2 id="hydration-title">Hydration</h2><p>Daily water goal and water intake tracking</p></div></div>
+      <div class="card hydration-card">
+        <div class="card-head" style="margin-bottom:12px"><div><h3>Today's Water Goal</h3><div class="card-sub">Your daily hydration progress</div></div><span class="view-pill">DEMO DATA</span></div>
+        <div class="goal-top"><div class="goal-amount"><span id="water-total">1,200</span> <small>ml</small></div><div style="color:var(--muted);font-size:12px">of <strong id="water-goal-label" style="color:var(--ink)">2,400 ml</strong></div></div>
+        <div class="progress-shell"><div class="progress-fill" id="water-progress" style="width:50%"></div></div>
+        <div class="progress-caption"><span id="water-percent">50% completed</span><span id="water-remaining">1,200 ml remaining</span></div>
+        <div class="divider"></div>
+        <div class="goal-breakdown">
+          <div class="goal-tile"><div class="tile-label">Base Water Goal</div><strong>2,000 ml</strong><small>Estimated daily baseline</small></div>
+          <div class="goal-tile"><div class="tile-label">Exercise Adjustment</div><strong style="color:var(--blue-dark)">+400 ml</strong><small>Illustrative adjustment</small></div>
+        </div>
+        <div class="divider"></div>
+        <h3>Log Water</h3>
+        <div class="quick-add" style="margin-top:10px">
+          <button class="btn" data-add="250">＋ 250 ml</button>
+          <button class="btn" data-add="500">＋ 500 ml</button>
+        </div>
+        <label class="form-label" for="custom-water">CUSTOM WATER INTAKE</label>
+        <form class="custom-row" id="water-form">
+          <div class="input-wrap"><input id="custom-water" type="number" min="1" max="10000" step="1" placeholder="Enter amount" inputmode="numeric" /><span class="unit">ml</span></div>
+          <button class="btn primary" type="submit">＋ Add</button>
+        </form>
+        <div class="divider"></div>
+        <div class="history-head"><h3>Water Intake History</h3><span class="entry-count" id="entry-count">3 entries</span></div>
+        <div class="history-list" id="history-list"></div>
+        <div class="total-row"><span>Total Water Consumed</span><strong id="water-total-bottom">1,200 ml</strong></div>
+        <div class="notice">This is a UI prototype. The base goal and exercise adjustment are illustrative values, not a personalized medical recommendation. Actual hydration needs vary by individual, workout, temperature and health conditions.</div>
+      </div>
+    </section>
+
+    <section aria-labelledby="statistics-title">
+      <div class="section-heading"><div><h2 id="statistics-title">Statistics</h2><p>Track your body condition over time</p></div></div>
+      <div class="card chart-card">
+        <div class="chart-title"><div><h3>Hydration Statistics</h3><p>Daily water consumption</p></div><div class="chart-icon">💧</div></div>
+        <div class="chart-wrap"><svg class="chart-svg" id="hydration-chart" viewBox="0 0 600 220" role="img" aria-label="Weekly hydration chart"></svg></div>
+        <div class="chart-legend"><span><i class="legend-line" style="background:#3989e8"></i>Water intake</span><span><i class="legend-line" style="background:#9eafc2"></i>Daily goal</span></div>
+        <p class="footnote">Example weekly hydration data. In the full app, this chart will use the user's saved daily intake records.</p>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-title"><div><h3>Fatigue Statistics</h3><p>Fatigue and recovery trends</p></div><div class="chart-icon">♥</div></div>
+        <div class="period-toggle" role="group" aria-label="Fatigue chart period"><button class="active" data-period="7">7 Days</button><button data-period="30">30 Days</button></div>
+        <div class="chart-wrap"><svg class="chart-svg" id="fatigue-chart" viewBox="0 0 600 220" role="img" aria-label="Fatigue and recovery chart"></svg></div>
+        <div class="chart-legend"><span><i class="legend-line" style="background:#dca044"></i>Fatigue</span><span><i class="legend-line" style="background:#2fa477"></i>Recovery</span></div>
+        <p class="footnote">Example fatigue and recovery data, not measured physiological values.</p>
+      </div>
+    </section>
+
+    <footer class="footer"><span>◇</span> AI Fitness Coach · Body Status Dashboard</footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'aifc-body-status-demo-v1';
+      const GOAL = 2400;
+      const initialState = {
+        selectedArea: 'Chest',
+        entries: [
+          { id: 1, amount: 250, time: '09:00' },
+          { id: 2, amount: 500, time: '11:30' },
+          { id: 3, amount: 450, time: '14:00' }
+        ]
+      };
+      const metrics = {
+        Chest: { fatigue: 42, recovery: 58, last: 'Yesterday' },
+        Back: { fatigue: 28, recovery: 72, last: '2 days ago' },
+        Arms: { fatigue: 56, recovery: 44, last: 'Yesterday' },
+        Core: { fatigue: 34, recovery: 66, last: '3 days ago' },
+        Legs: { fatigue: 68, recovery: 32, last: 'Today' }
+      };
+      let state = loadState();
+      let currentPeriod = 7;
+      let toastTimer;
+
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (saved && Array.isArray(saved.entries)) {
+            return { selectedArea: metrics[saved.selectedArea] ? saved.selectedArea : 'Chest', entries: saved.entries.filter(e => Number.isFinite(e.amount) && e.amount > 0) };
+          }
+        } catch (_) { /* localStorage may be unavailable */ }
+        return structuredClone(initialState);
+      }
+      function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) { /* continue without persistence */ }
+      }
+      function totalWater() { return state.entries.reduce((sum, entry) => sum + entry.amount, 0); }
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1900);
+      }
+      function escapeText(value) {
+        return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+      function setArea(area) {
+        if (!metrics[area]) return;
+        state.selectedArea = area;
+        saveState();
+        renderArea();
+      }
+      function renderArea() {
+        const area = state.selectedArea;
+        const info = metrics[area];
+        const back = area === 'Back';
+        document.getElementById('front-map').hidden = back;
+        document.getElementById('back-map').hidden = !back;
+        document.getElementById('view-label').textContent = back ? 'BACK VIEW' : 'FRONT VIEW';
+        document.getElementById('selected-area').textContent = area;
+        document.querySelectorAll('.area-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.area === area));
+        document.querySelectorAll('.body-svg .body-region').forEach(path => path.classList.toggle('active', path.dataset.area === area));
+        document.getElementById('part-name').textContent = area + ' Status';
+        document.getElementById('fatigue-value').textContent = info.fatigue + '%';
+        document.getElementById('recovery-value').textContent = info.recovery + '%';
+        document.getElementById('fatigue-bar').style.width = info.fatigue + '%';
+        document.getElementById('recovery-bar').style.width = info.recovery + '%';
+        document.getElementById('last-training').textContent = info.last;
+        const level = info.fatigue >= 60 ? 'high' : info.fatigue >= 40 ? 'medium' : 'low';
+        const badge = document.getElementById('fatigue-badge');
+        badge.className = 'status-badge ' + level;
+        badge.textContent = level === 'high' ? 'High Fatigue' : level === 'medium' ? 'Moderate Fatigue' : 'Low Fatigue';
+        document.getElementById('training-status').textContent = level === 'high' ? 'Needs Recovery' : level === 'medium' ? 'Moderate Load' : 'Recovering Well';
+        document.getElementById('coach-insight').textContent = level === 'high'
+          ? 'This muscle group has a relatively high fatigue score. Review its training load and recovery before your next session.'
+          : level === 'medium'
+            ? 'This muscle group has moderate fatigue. Consider monitoring recovery before increasing training intensity.'
+            : 'This muscle group has a relatively low fatigue score. Continue monitoring training and recovery.';
+      }
+      function addWater(amount) {
+        const n = Math.round(Number(amount));
+        if (!Number.isFinite(n) || n <= 0 || n > 10000) { showToast('Enter an amount between 1 and 10,000 ml.'); return; }
+        const time = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+        state.entries.push({ id: Date.now() + Math.random(), amount: n, time });
+        saveState();
+        renderHydration();
+        showToast(n.toLocaleString() + ' ml added');
+      }
+      function removeEntry(id) {
+        state.entries = state.entries.filter(entry => String(entry.id) !== String(id));
+        saveState();
+        renderHydration();
+        showToast('Water entry removed');
+      }
+      function renderHydration() {
+        const total = totalWater();
+        const remaining = Math.max(0, GOAL - total);
+        const percent = Math.min(100, Math.round(total / GOAL * 100));
+        document.getElementById('water-total').textContent = total.toLocaleString();
+        document.getElementById('water-total-bottom').textContent = total.toLocaleString() + ' ml';
+        document.getElementById('water-goal-label').textContent = GOAL.toLocaleString() + ' ml';
+        document.getElementById('water-progress').style.width = percent + '%';
+        document.getElementById('water-percent').textContent = percent + '% completed';
+        document.getElementById('water-remaining').textContent = remaining.toLocaleString() + ' ml remaining';
+        document.getElementById('entry-count').textContent = state.entries.length + (state.entries.length === 1 ? ' entry' : ' entries');
+        const list = document.getElementById('history-list');
+        if (!state.entries.length) {
+          list.innerHTML = '<div class="empty-state">No water entries yet. Add your first intake above.</div>';
+          return;
+        }
+        list.innerHTML = state.entries.slice().reverse().map((entry, index) => `
+          <div class="history-entry">
+            <div class="entry-left"><div class="glass-icon" aria-hidden="true">♧</div><div><div class="entry-name">Water Entry ${state.entries.length - index}</div><span class="entry-time">${escapeText(entry.time || '')}</span></div></div>
+            <div class="entry-right"><span class="entry-amount">+${Number(entry.amount).toLocaleString()} ml</span><button class="btn danger-ghost" type="button" data-remove="${escapeText(entry.id)}" aria-label="Remove water entry"><span aria-hidden="true">✕</span></button></div>
+          </div>`).join('');
+      }
+
+      function makeLineChart(svgId, series, labels, maxValue, ySuffix = '') {
+        const svg = document.getElementById(svgId);
+        const W = 600, H = 220, left = 43, right = 15, top = 12, bottom = 32;
+        const plotW = W - left - right, plotH = H - top - bottom;
+        const x = i => left + (labels.length === 1 ? plotW / 2 : (i * plotW / (labels.length - 1)));
+        const y = value => top + plotH - (value / maxValue) * plotH;
+        let markup = '';
+        for (let i = 0; i <= 4; i++) {
+          const val = maxValue - (maxValue / 4) * i;
+          const yy = y(val);
+          markup += `<line class="chart-grid" x1="${left}" y1="${yy}" x2="${W-right}" y2="${yy}"/><text class="chart-axis" x="${left-9}" y="${yy+3}" text-anchor="end">${Math.round(val/100)*100}${ySuffix}</text>`;
+        }
+        labels.forEach((label, i) => { markup += `<text class="chart-axis" x="${x(i)}" y="${H-9}" text-anchor="middle">${escapeText(label)}</text>`; });
+        series.forEach(s => {
+          const points = s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+          markup += `<polyline class="${s.className}" points="${points}"/>`;
+          if (s.dots) s.values.forEach((v, i) => { markup += `<circle class="chart-dot" cx="${x(i)}" cy="${y(v)}" r="3.5"/>`; });
+        });
+        svg.innerHTML = markup;
+      }
+      function renderCharts() {
+        makeLineChart('hydration-chart', [
+          { className: 'chart-line-blue', values: [1800,2200,1600,2400,1950,2100,1250], dots: true },
+          { className: 'chart-line-grey', values: [2400,2400,2400,2400,2400,2400,2400] }
+        ], ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], 3000);
+        const labels = currentPeriod === 7 ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['W1','W2','W3','W4'];
+        const fatigue = currentPeriod === 7 ? [35,60,55,40,70,50,42] : [55,65,45,35];
+        const recovery = currentPeriod === 7 ? [65,40,45,60,30,50,58] : [45,35,55,65];
+        makeLineChart('fatigue-chart', [
+          { className: 'chart-line-amber', values: fatigue, dots: true },
+          { className: 'chart-line-green', values: recovery, dots: true }
+        ], labels, 100, '%');
+      }
+
+      // Bind controls.
+      document.getElementById('area-buttons').addEventListener('click', event => {
+        const button = event.target.closest('[data-area]');
+        if (button) setArea(button.dataset.area);
+      });
+      document.querySelectorAll('.body-svg .body-region').forEach(path => {
+        path.addEventListener('click', () => setArea(path.dataset.area));
+      });
+      document.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => addWater(button.dataset.add)));
+      document.getElementById('water-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const input = document.getElementById('custom-water');
+        if (!input.value.trim()) { input.focus(); return; }
+        addWater(input.value);
+        input.value = '';
+      });
+      document.getElementById('history-list').addEventListener('click', event => {
+        const button = event.target.closest('[data-remove]');
+        if (button) removeEntry(button.dataset.remove);
+      });
+      document.querySelectorAll('[data-period]').forEach(button => button.addEventListener('click', () => {
+        currentPeriod = Number(button.dataset.period);
+        document.querySelectorAll('[data-period]').forEach(b => b.classList.toggle('active', b === button));
+        renderCharts();
+      }));
+
+      const now = new Date();
+      document.getElementById('today-label').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>${now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`;
+      renderArea();
+      renderHydration();
+      renderCharts();
+    })();
+  </script>
+</body>
+</html>
