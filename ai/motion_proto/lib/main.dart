@@ -5,13 +5,13 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 import 'angle_gauge.dart';
 import 'demo_figure.dart';
 import 'move_guides.dart';
 import 'pose_painter.dart';
+import 'pose_stability.dart';
 import 'rep_counter.dart';
 
 const _teal = Color(0xFF2BB3A3);
@@ -75,6 +75,25 @@ class _Measurement {
   final List<List<PoseLandmarkType>> sides;
 }
 
+/// ข้อมูลที่ใช้วาดเส้นทับภาพ อัปเดตทุกเฟรมผ่าน ValueNotifier
+/// (ไม่ต้อง rebuild ทั้งหน้าจอทุกเฟรม)
+class _Overlay {
+  const _Overlay({
+    required this.points,
+    required this.imageSize,
+    required this.rotation,
+    required this.sides,
+    required this.color,
+    required this.angleText,
+  });
+  final Map<PoseLandmarkType, LmPoint> points;
+  final Size imageSize;
+  final InputImageRotation rotation;
+  final List<List<PoseLandmarkType>> sides;
+  final Color color;
+  final String? angleText;
+}
+
 class MotionScreen extends StatefulWidget {
   const MotionScreen({super.key});
 
@@ -90,6 +109,10 @@ class _MotionScreenState extends State<MotionScreen> {
     DeviceOrientation.landscapeRight: 270,
   };
 
+  /// ส่วนอื่นของหน้าจอ (ตัวเลข, แถบมุม ฯลฯ) rebuild อย่างน้อยทุกกี่ ms
+  /// เส้นโครงร่างอัปเดตทุกเฟรมแยกต่างหาก
+  static const _uiIntervalMs = 100;
+
   List<CameraDescription> _cameras = const [];
   int _cameraIndex = 0;
   CameraController? _controller;
@@ -100,6 +123,14 @@ class _MotionScreenState extends State<MotionScreen> {
   double _smoothing = 0.4;
   String _zoomText = '';
 
+  // กรองตำแหน่งจุดข้อต่อ (ลดอาการสั่น) และเลือกข้างแบบไม่สลับไปมา
+  final LandmarkSmoother<PoseLandmarkType> _smoother = LandmarkSmoother();
+  final StickyPicker _picker = StickyPicker();
+  bool _filterOn = true;
+  double _minCutoff = 1.5;
+  final Stopwatch _clock = Stopwatch()..start();
+  double? _lastFrameSec;
+
   TrackedMove _move = TrackedMove.squat;
   late RepCounter _counter =
       RepCounter(moveSpecs[_move]!, smoothing: _smoothing);
@@ -109,20 +140,23 @@ class _MotionScreenState extends State<MotionScreen> {
   bool _busy = false;
 
   // ผลล่าสุดจากการตรวจจับ
-  Pose? _pose;
-  Size? _imageSize;
+  final ValueNotifier<_Overlay?> _overlay = ValueNotifier<_Overlay?>(null);
+  Map<PoseLandmarkType, LmPoint> _points = const {};
   InputImageRotation? _lastRotation;
-  _Measurement? _measurement;
   double? _angle;
   double? _minAngle;
   double? _maxAngle;
   DateTime _lastRepAt = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime _lastUiAt = DateTime.fromMillisecondsSinceEpoch(0);
   String _status = 'พร้อม';
 
   // ตัวเลขวัดประสิทธิภาพ
-  double _inferMs = 0;
-  double _fps = 0;
+  double _inferMs = 0; // ทั้งเฟรม: แปลงภาพ + ตรวจจับ + คำนวณ
+  double _detectMs = 0; // เฉพาะ detector.processImage
+  double _fps = 0; // เฟรมที่ประมวลผลจริงต่อวินาที
+  double _rxFps = 0; // เฟรมที่กล้องส่งเข้ามาต่อวินาที (รวมที่ทิ้ง)
   int _frames = 0;
+  int _rx = 0;
   DateTime _fpsStart = DateTime.now();
 
   bool get _supported => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
@@ -141,6 +175,7 @@ class _MotionScreenState extends State<MotionScreen> {
       c.dispose();
     }
     _detector?.close();
+    _overlay.dispose();
     super.dispose();
   }
 
@@ -280,34 +315,65 @@ class _MotionScreenState extends State<MotionScreen> {
     );
   }
 
-  /// วัดมุมจากข้างที่เห็นชัดพอ (likelihood >= 0.5)
-  /// ท่าที่ตั้ง bestSideOnly (วิดพื้น) ใช้เฉพาะข้างที่ชัดที่สุด ท่าอื่นเฉลี่ยทั้งสองข้าง
-  _Measurement? _measure(Map<PoseLandmarkType, PoseLandmark> lm) {
+  /// วัดมุมจากข้างที่เห็นชัดพอ (จุดที่ผ่านการกรองแล้วมี likelihood >= 0.5)
+  /// ท่าที่ตั้ง bestSideOnly (วิดพื้น) ใช้ข้างเดียวที่ชัดสุด และไม่สลับข้างจนกว่า
+  /// อีกข้างจะชัดกว่าต่อเนื่องหลายเฟรม ท่าอื่นเฉลี่ยสองข้าง
+  _Measurement? _measure(Map<PoseLandmarkType, LmPoint> lm) {
     final spec = moveSpecs[_move]!;
-    final found = <_Side>[];
+    final found = <_Side?>[];
     for (final t in triplesFor(_move)) {
       final p = t.map((k) => lm[k]).toList();
-      if (p.any((e) => e == null)) continue;
+      if (p.any((e) => e == null)) {
+        found.add(null);
+        continue;
+      }
       final minL = p.map((e) => e!.likelihood).reduce(math.min);
-      if (minL < 0.5) continue;
       final a = angleDeg(
         Pt(p[0]!.x, p[0]!.y),
         Pt(p[1]!.x, p[1]!.y),
         Pt(p[2]!.x, p[2]!.y),
       );
-      if (a.isNaN) continue;
-      found.add(_Side(a, minL, t));
+      found.add(a.isNaN ? null : _Side(a, minL, t));
     }
-    if (found.isEmpty) return null;
-    found.sort((x, y) => y.likelihood.compareTo(x.likelihood));
-    if (spec.bestSideOnly || found.length == 1) {
-      return _Measurement(found.first.angle, [found.first.triple]);
+    final valid = found.whereType<_Side>().toList();
+    if (valid.isEmpty) {
+      _picker.reset();
+      return null;
     }
-    final avg = found.map((s) => s.angle).reduce((a, b) => a + b) / found.length;
-    return _Measurement(avg, found.map((s) => s.triple).toList());
+    if (spec.bestSideOnly) {
+      final idx = _picker.pick([for (final s in found) s?.likelihood]);
+      final side = idx == null ? null : found[idx];
+      if (side != null) return _Measurement(side.angle, [side.triple]);
+    }
+    valid.sort((x, y) => y.likelihood.compareTo(x.likelihood));
+    if (valid.length == 1) {
+      return _Measurement(valid.first.angle, [valid.first.triple]);
+    }
+    final avg = valid.map((s) => s.angle).reduce((a, b) => a + b) / valid.length;
+    return _Measurement(avg, valid.map((s) => s.triple).toList());
+  }
+
+  void _tickWindow() {
+    final now = DateTime.now();
+    final elapsed = now.difference(_fpsStart).inMilliseconds;
+    if (elapsed >= 1000) {
+      _fps = _frames * 1000 / elapsed;
+      _rxFps = _rx * 1000 / elapsed;
+      _frames = 0;
+      _rx = 0;
+      _fpsStart = now;
+      debugPrint('PERF,${now.toIso8601String()},${_move.name},$_res,'
+          'acc=$_accurate,filter=$_filterOn,'
+          'fps=${_fps.toStringAsFixed(1)},rx=${_rxFps.toStringAsFixed(1)},'
+          'ms=${_inferMs.toStringAsFixed(0)},detect=${_detectMs.toStringAsFixed(0)},'
+          'angle=${_angle?.round()},min=${_minAngle?.round()},'
+          'max=${_maxAngle?.round()},reps=${_counter.reps}');
+    }
   }
 
   Future<void> _onFrame(CameraImage image) async {
+    _rx++;
+    _tickWindow();
     if (_busy || !_running) return;
     _busy = true;
     final sw = Stopwatch()..start();
@@ -319,11 +385,35 @@ class _MotionScreenState extends State<MotionScreen> {
         return;
       }
 
+      final swDetect = Stopwatch()..start();
       final poses = await detector.processImage(input);
+      swDetect.stop();
       if (!mounted || !_running) return;
 
       final pose = poses.isEmpty ? null : poses.first;
-      final m = pose == null ? null : _measure(pose.landmarks);
+      final imageSize = Size(image.width.toDouble(), image.height.toDouble());
+
+      // เวลาจริงระหว่างเฟรมที่ประมวลผล ใช้เป็น dt ของฟิลเตอร์
+      final nowSec = _clock.elapsedMicroseconds / 1e6;
+      final lastSec = _lastFrameSec;
+      final dt = lastSec == null ? 1 / 30 : nowSec - lastSec;
+      _lastFrameSec = nowSec;
+
+      final Map<PoseLandmarkType, LmPoint> raw = pose == null
+          ? const {}
+          : {
+              for (final e in pose.landmarks.entries)
+                e.key: LmPoint(e.value.x, e.value.y, e.value.likelihood),
+            };
+      _smoother.minCutoff = _minCutoff;
+      final points = _smoother.update(
+        raw,
+        dt,
+        scale: math.max(imageSize.width, imageSize.height),
+        smooth: _filterOn,
+      );
+
+      final m = _measure(points);
       final angle = m?.angle;
       var repDone = false;
       if (angle != null) {
@@ -336,30 +426,41 @@ class _MotionScreenState extends State<MotionScreen> {
         HapticFeedback.lightImpact();
       }
 
-      // วัด FPS และเวลาประมวลผลต่อเฟรม
+      // วัดเวลาประมวลผลต่อเฟรม
       sw.stop();
-      final ms = sw.elapsedMilliseconds.toDouble();
+      final ms = sw.elapsedMicroseconds / 1000;
+      final dms = swDetect.elapsedMicroseconds / 1000;
       _inferMs = _inferMs == 0 ? ms : _inferMs * 0.8 + ms * 0.2;
+      _detectMs = _detectMs == 0 ? dms : _detectMs * 0.8 + dms * 0.2;
       _frames++;
-      final now = DateTime.now();
-      final elapsed = now.difference(_fpsStart).inMilliseconds;
-      if (elapsed >= 1000) {
-        _fps = _frames * 1000 / elapsed;
-        _frames = 0;
-        _fpsStart = now;
-      }
 
-      setState(() {
-        _pose = pose;
-        _measurement = m;
-        _imageSize = Size(image.width.toDouble(), image.height.toDouble());
-        _angle = angle;
-        _status = pose == null
-            ? 'ไม่พบร่างกายในภาพ'
-            : angle == null
-                ? 'เห็นร่างกาย แต่ข้อต่อของท่านี้ไม่ชัดพอ'
-                : 'กำลังติดตาม';
-      });
+      _points = points;
+      _angle = angle;
+      _status = pose == null
+          ? 'ไม่พบร่างกายในภาพ'
+          : angle == null
+              ? 'เห็นร่างกาย แต่ข้อต่อของท่านี้ไม่ชัดพอ'
+              : 'กำลังติดตาม';
+
+      // เส้นโครงร่าง: อัปเดตทุกเฟรม (วาดใหม่เฉพาะส่วนนี้)
+      final rotation = _lastRotation;
+      _overlay.value = (points.isEmpty || rotation == null)
+          ? null
+          : _Overlay(
+              points: points,
+              imageSize: imageSize,
+              rotation: rotation,
+              sides: m?.sides ?? const <List<PoseLandmarkType>>[],
+              color: _focusColor,
+              angleText: angle == null ? null : '${angle.round()}°',
+            );
+
+      // ส่วนอื่นของหน้าจอ: rebuild จำกัดความถี่ (ยกเว้นตอนนับครบหนึ่งครั้ง)
+      final now = DateTime.now();
+      if (repDone || now.difference(_lastUiAt).inMilliseconds >= _uiIntervalMs) {
+        _lastUiAt = now;
+        setState(() {});
+      }
     } catch (e) {
       debugPrint('frame error: $e');
       if (mounted) setState(() => _status = 'ERR: $e');
@@ -392,10 +493,13 @@ class _MotionScreenState extends State<MotionScreen> {
     final c = _controller;
     if (c == null || !c.value.isInitialized) return;
     _counter.reset();
+    _smoother.reset();
+    _picker.reset();
+    _lastFrameSec = null;
+    _overlay.value = null;
     setState(() {
       _running = true;
-      _pose = null;
-      _measurement = null;
+      _points = const {};
       _angle = null;
       _minAngle = null;
       _maxAngle = null;
@@ -406,10 +510,10 @@ class _MotionScreenState extends State<MotionScreen> {
 
   Future<void> _stop() async {
     final c = _controller;
+    _overlay.value = null;
     setState(() {
       _running = false;
-      _pose = null;
-      _measurement = null;
+      _points = const {};
       _status = 'หยุดแล้ว';
     });
     if (c != null && c.value.isStreamingImages) await c.stopImageStream();
@@ -417,11 +521,11 @@ class _MotionScreenState extends State<MotionScreen> {
 
   void _changeMove(TrackedMove m) {
     if (_running) return;
+    _picker.reset();
     setState(() {
       _move = m;
       _counter = RepCounter(moveSpecs[m]!, smoothing: _smoothing);
       _angle = null;
-      _measurement = null;
       _minAngle = null;
       _maxAngle = null;
     });
@@ -466,10 +570,7 @@ class _MotionScreenState extends State<MotionScreen> {
     final ps = c.value.previewSize!;
     // ล็อกจอแนวตั้ง: preview กว้าง = ps.height, สูง = ps.width
     final canvas = Size(ps.height, ps.width);
-    final pose = _pose;
-    final imageSize = _imageSize;
-    final rotation = _lastRotation;
-    final sides = _measurement?.sides ?? const <List<PoseLandmarkType>>[];
+    final lens = _cameras[_cameraIndex].lensDirection;
 
     return FittedBox(
       fit: BoxFit.cover,
@@ -480,18 +581,23 @@ class _MotionScreenState extends State<MotionScreen> {
           fit: StackFit.expand,
           children: [
             CameraPreview(c),
-            if (_running && pose != null && imageSize != null && rotation != null)
-              CustomPaint(
-                painter: PosePainter(
-                  pose: pose,
-                  imageSize: imageSize,
-                  rotation: rotation,
-                  lens: _cameras[_cameraIndex].lensDirection,
-                  focusSides: sides,
-                  focusColor: _focusColor,
-                  angleText: _angle == null ? null : '${_angle!.round()}°',
-                ),
-              ),
+            ValueListenableBuilder<_Overlay?>(
+              valueListenable: _overlay,
+              builder: (context, o, child) {
+                if (!_running || o == null) return const SizedBox.shrink();
+                return CustomPaint(
+                  painter: PosePainter(
+                    points: o.points,
+                    imageSize: o.imageSize,
+                    rotation: o.rotation,
+                    lens: lens,
+                    focusSides: o.sides,
+                    focusColor: o.color,
+                    angleText: o.angleText,
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -500,7 +606,6 @@ class _MotionScreenState extends State<MotionScreen> {
 
   /// รายการจุดที่ต้องเห็น (✓ เห็นชัด / ✗ ไม่เห็น) ช่วยหาระยะวางมือถือที่ใกล้ที่สุดที่ยังใช้ได้
   Widget _visibility(MoveGuide guide) {
-    final lm = _pose?.landmarks;
     final triples = triplesFor(_move);
     const sides = ['ซ้าย', 'ขวา'];
     final rows = <Widget>[];
@@ -512,8 +617,7 @@ class _MotionScreenState extends State<MotionScreen> {
         ),
       ];
       for (var j = 0; j < 3; j++) {
-        final l = lm?[triples[i][j]];
-        final ok = l != null && l.likelihood >= 0.5;
+        final ok = _points.containsKey(triples[i][j]);
         spans.add(TextSpan(
           text: '${guide.jointNames[j]} ${ok ? '✓' : '✗'}   ',
           style: TextStyle(
@@ -650,8 +754,8 @@ class _MotionScreenState extends State<MotionScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            Text('จุดที่ระบบต้องเห็น (ซ้าย/ขวาของตัวคน)',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const Text('จุดที่ระบบต้องเห็น (ซ้าย/ขวาของตัวคน)',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
             const SizedBox(height: 4),
             _visibility(guide),
             const SizedBox(height: 6),
@@ -666,7 +770,7 @@ class _MotionScreenState extends State<MotionScreen> {
                       : Colors.white54,
                 )),
             Text(
-              'FPS ${_fps.toStringAsFixed(1)}  ·  ${_inferMs.toStringAsFixed(0)} ms/เฟรม  ·  ${_zoomText.isEmpty ? 'ซูมปรับไม่ได้' : _zoomText}$sizeText',
+              'FPS ${_fps.toStringAsFixed(1)} (กล้องส่งมา ${_rxFps.toStringAsFixed(1)})  ·  ${_inferMs.toStringAsFixed(0)} ms/เฟรม (ตรวจจับ ${_detectMs.toStringAsFixed(0)} ms)  ·  ${_zoomText.isEmpty ? 'ซูมปรับไม่ได้' : _zoomText}$sizeText${kReleaseMode ? '  ·  release' : '  ·  debug/profile'}',
               style: const TextStyle(fontSize: 12, color: Colors.white54),
             ),
             Text(
@@ -708,6 +812,23 @@ class _MotionScreenState extends State<MotionScreen> {
                 _smoothing = v;
                 _counter.smoothing = v;
               }),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('กรองจุดข้อต่อให้นิ่ง'),
+              subtitle: const Text('ปิดเพื่อเทียบกับค่าดิบจากโมเดล (ใช้ทดสอบก่อน/หลัง)'),
+              value: _filterOn,
+              onChanged: (v) => setState(() => _filterOn = v),
+            ),
+            Text(
+                'ความนิ่งของจุดข้อต่อ ${_minCutoff.toStringAsFixed(1)} Hz (ต่ำ = นิ่งขึ้นแต่เส้นตามหลังมากขึ้น)',
+                style: const TextStyle(fontSize: 13)),
+            Slider(
+              min: 0.5,
+              max: 5.0,
+              value: _minCutoff,
+              onChanged: _filterOn ? (v) => setState(() => _minCutoff = v) : null,
             ),
             const Text('ความละเอียดภาพที่ส่งให้ตรวจจับ',
                 style: TextStyle(fontSize: 13)),
