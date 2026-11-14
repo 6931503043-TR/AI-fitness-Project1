@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FORGE — Gym Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14130F;
+  --surface:#1E1C17;
+  --surface-2:#26241D;
+  --border: rgba(245,243,238,0.10);
+  --border-strong: rgba(245,243,238,0.18);
+  --text: #F5F3EE;
+  --text-secondary:#A7A296;
+  --text-muted:#6E6A5F;
+  --accent:#FF5A1F;
+  --accent-text:#FFD9C6;
+  --accent-bg: rgba(255,90,31,0.14);
+  --recovery:#2BB3A3;
+  --recovery-text:#B7ECE5;
+  --recovery-bg: rgba(43,179,163,0.14);
+  --danger:#E4574B;
+  --nav-bg:rgba(20,19,15,0.92);
+  --grid-line:rgba(245,243,238,0.05);
+  color-scheme:dark;
+  --radius:16px;
+  --font-head: 'Barlow Condensed', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  display:flex;
+  justify-content:center;
+  min-height:100vh;
+}
+.shell{
+  width:100%;
+  max-width:440px;
+  min-height:100%;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  border-left:0.5px solid var(--border);
+  border-right:0.5px solid var(--border);
+}
+.topbar{
+  padding:20px 20px 14px;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+}
+.topbar .brand{
+  font-family:var(--font-head);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0.5px;
+}
+.topbar .brand span{color:var(--accent);}
+.topbar .streak{
+  font-size:13px;
+  color:var(--text-secondary);
+}
+main{
+  flex:1;
+  padding:4px 20px 100px;
+}
+.screen{display:none;}
+.screen.active{display:block;}
+h1.page-title{
+  font-family:var(--font-head);
+  font-weight:600;
+  font-size:32px;
+  margin:6px 0 4px;
+  letter-spacing:0.3px;
+}
+p.page-sub{
+  color:var(--text-secondary);
+  font-size:14px;
+  margin:0 0 20px;
+  line-height:1.5;
+}
+.segment{
+  display:flex;
+  gap:6px;
+  background:var(--surface);
+  border-radius:12px;
+  padding:4px;
+  margin-bottom:18px;
+  border:0.5px solid var(--border);
+}
+.segment button{
+  flex:1;
+  border:none;
+  background:transparent;
+  color:var(--text-secondary);
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:500;
+  padding:9px 0;
+  border-radius:9px;
+  cursor:pointer;
+}
+.segment button.active{
+  background:var(--accent);
+  color:#1B0A03;
+  font-weight:600;
+}
+.card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  margin-bottom:14px;
+}
+.card-title{
+  font-size:15px;
+  font-weight:600;
+  margin:0 0 2px;
+}
+.card-sub{
+  font-size:13px;
+  color:var(--text-secondary);
+  margin:0 0 12px;
+}
+.exercise-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 0;
+  border-top:0.5px solid var(--border);
+}
+.exercise-row:first-of-type{border-top:none;}
+.exercise-num{
+  font-family:var(--font-head);
+  font-size:20px;
+  color:var(--text-muted);
+  width:22px;
+}
+.exercise-info{flex:1;}
+.exercise-name{font-size:14px; font-weight:500;}
+.exercise-meta{font-size:12px; color:var(--text-secondary); margin-top:2px;}
+.remove-btn{
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  font-size:18px;
+  cursor:pointer;
+  padding:4px 6px;
+}
+.add-exercise-form{
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.add-exercise-form input{
+  grid-column:span 1;
+}
+.add-exercise-form .name-field{grid-column: 1 / -1;}
+input, select{
+  width:100%;
+  height:38px;
+  background:var(--surface-2);
+  border:0.5px solid var(--border-strong);
+  border-radius:9px;
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:13px;
+  padding:0 10px;
+}
+input::placeholder{color:var(--text-muted);}
+label.field-label{
+  font-size:12px;
+  color:var(--text-secondary);
+  display:block;
+  margin:0 0 5px;
+}
+.btn{
+  height:42px;
+  border-radius:10px;
+  border:0.5px solid var(--border-strong);
+  background:var(--surface-2);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-weight:500;
+  font-size:14px;
+  cursor:pointer;
+  width:100%;
+}
+.btn-accent{
+  background:var(--accent);
+  color:#1B0A03;
+  border:none;
+  font-weight:600;
+}
+.btn-ghost{
+  background:transparent;
+}
+.btn-sm{
+  height:32px;
+  font-size:12px;
+  padding:0 12px;
+  width:auto;
+}
+.muscle-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 0;
+  border-top:0.5px solid var(--border);
+}
+.muscle-row:first-of-type{border-top:none;}
+.muscle-name{
+  width:84px;
+  font-size:13px;
+  font-weight:500;
+}
+.muscle-bar-track{
+  flex:1;
+  height:6px;
+  border-radius:3px;
+  background:var(--surface-2);
+  overflow:hidden;
+}
+.muscle-bar-fill{
+  height:100%;
+  border-radius:3px;
+}
+.muscle-status{
+  width:96px;
+  text-align:right;
+  font-size:12px;
+  color:var(--text-secondary);
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.stat-card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  border:0.5px solid var(--border);
+}
+.stat-label{font-size:12px; color:var(--text-secondary); margin:0 0 4px;}
+.stat-value{font-family:var(--font-head); font-size:26px; font-weight:600; margin:0;}
+.stat-value small{font-family:var(--font-body); font-size:13px; color:var(--text-secondary); font-weight:400;}
+.calc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.work-camera{
+  position:relative;
+  aspect-ratio: 3 / 4;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2));
+  border-radius:20px;
+  border:0.5px solid var(--border-strong);
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:16px;
+}
+.work-camera .grid-overlay{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 12.5% 12.5%;
+}
+.work-camera .skeleton-placeholder{
+  color:var(--text-muted);
+  text-align:center;
+  padding:0 30px;
+}
+.work-camera .skeleton-placeholder i{
+  font-size:40px;
+  display:block;
+  margin:0 auto 10px;
+}
+.corner{
+  position:absolute;
+  width:22px; height:22px;
+  border-color:var(--accent);
+  border-style:solid;
+}
+.corner.tl{top:14px; left:14px; border-width:2px 0 0 2px; border-radius:4px 0 0 0;}
+.corner.tr{top:14px; right:14px; border-width:2px 2px 0 0; border-radius:0 4px 0 0;}
+.corner.bl{bottom:14px; left:14px; border-width:0 0 2px 2px; border-radius:0 0 0 4px;}
+.corner.br{bottom:14px; right:14px; border-width:0 2px 2px 0; border-radius:0 0 4px 0;}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:20px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  border:0.5px solid var(--border-strong);
+}
+.badge-dot{width:6px; height:6px; border-radius:50%; background:var(--text-muted);}
+.chat-toggle{
+  display:flex;
+  gap:6px;
+  margin-bottom:16px;
+}
+.chip{
+  padding:8px 14px;
+  border-radius:20px;
+  border:0.5px solid var(--border-strong);
+  font-size:13px;
+  background:var(--surface);
+  color:var(--text-secondary);
+}
+.chip.active{
+  background:var(--accent-bg);
+  border-color:var(--accent);
+  color:var(--accent-text);
+}
+.chat-bubble{
+  max-width:78%;
+  padding:10px 14px;
+  border-radius:14px;
+  font-size:13.5px;
+  line-height:1.5;
+  margin-bottom:10px;
+}
+.chat-bubble.them{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-bottom-left-radius:4px;
+}
+.chat-bubble.me{
+  background:var(--accent);
+  color:#1B0A03;
+  margin-left:auto;
+  border-bottom-right-radius:4px;
+}
+.chat-input-row{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
+.settings-list .settings-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 0;
+  border-top:0.5px solid var(--border);
+  color:var(--text-secondary);
+}
+.settings-list .settings-item:first-child{border-top:none;}
+.settings-item i{font-size:18px; width:20px; text-align:center;}
+.settings-item span{flex:1; font-size:14px; color:var(--text);}
+.coming-soon-tag{
+  font-size:11px;
+  color:var(--text-muted);
+  border:0.5px solid var(--border-strong);
+  padding:2px 8px;
+  border-radius:8px;
+}
+.empty-hint{
+  font-size:12px;
+  color:var(--text-muted);
+  text-align:center;
+  padding:18px 0 4px;
+}
+nav.bottombar{
+  position:sticky;
+  bottom:0;
+  left:0; right:0;
+  background:var(--nav-bg);
+  backdrop-filter:blur(6px);
+  border-top:0.5px solid var(--border);
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:8px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.nav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  font-family:var(--font-body);
+  font-size:10.5px;
+  cursor:pointer;
+  padding:4px 0;
+}
+.nav-item i{font-size:19px;}
+.nav-item.active{color:var(--text);}
+.nav-item.active i{color:var(--accent);}
+.nav-item.work-btn{
+  flex:0 0 64px;
+  margin-top:-26px;
+}
+.nav-item.work-btn .work-circle{
+  width:56px; height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:4px solid var(--bg);
+  margin-bottom:2px;
+}
+.nav-item.work-btn .work-circle i{font-size:22px; color:#1B0A03;}
+.nav-item.work-btn span{color:var(--text-secondary);}
+.sr-only{
+  position:absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+.set-head{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
+.set-head .card-title{margin:0;}
+.set-head i{color:var(--accent); display:flex;}
+.set-field{margin-bottom:12px;}
+.switch{
+  flex:none; width:44px; height:26px; border-radius:13px;
+  border:0.5px solid var(--border-strong); background:var(--surface-2);
+  position:relative; cursor:pointer; padding:0;
+}
+.switch::after{
+  content:''; position:absolute; top:2px; left:2px; width:20px; height:20px;
+  border-radius:50%; background:var(--text-secondary); transition:transform .15s;
+}
+.switch[aria-checked="true"]{background:var(--accent); border-color:var(--accent);}
+.switch[aria-checked="true"]::after{transform:translateX(18px); background:#1B0A03;}
+.settings-item input[type="time"]{width:112px; flex:none;}
+.btn-danger{color:var(--danger); border-color:rgba(228,87,75,0.45);}
+.set-msg{font-size:12px; margin:8px 0 0; min-height:16px; color:var(--recovery-text);}
+.set-msg.err{color:var(--danger);}
+.about-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-top:0.5px solid var(--border); color:var(--text-secondary);}
+.about-row:first-of-type{border-top:none;}
+.about-row b{font-weight:500; color:var(--text);}
+#hello{display:inline-block; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom;}
+#hello:not(:empty)::after{content:' · ';}
+.toast{
+  position:fixed; left:50%; bottom:96px; transform:translateX(-50%);
+  background:var(--surface-2); color:var(--text); border:0.5px solid var(--border-strong);
+  padding:10px 16px; border-radius:12px; font-size:13px; max-width:90%;
+  opacity:0; pointer-events:none; transition:opacity .2s; z-index:50;
+}
+.toast.show{opacity:1;}
+
+[hidden]{display:none !important;}
+.menu-list{padding:2px 16px;}
+.menu-item,.opt-row{
+  display:flex; align-items:center; gap:14px; width:100%;
+  background:none; border:none; border-top:0.5px solid var(--border);
+  color:var(--text); padding:14px 0; text-align:left; cursor:pointer;
+  font-family:var(--font-body);
+}
+.menu-item:first-child,.opt-row:first-child{border-top:none;}
+.mi-icon{color:var(--text-secondary); display:flex; width:22px; justify-content:center; flex:none;}
+.mi-text{flex:1; min-width:0;}
+.mi-text b{display:block; font-size:15px; font-weight:600;}
+.mi-text small{display:block; font-size:12.5px; color:var(--text-secondary); margin-top:2px;}
+.chev{color:var(--text-muted); display:flex; flex:none;}
+.opt-row span{flex:1; font-size:15px;}
+.opt-row[aria-checked="true"]::after{content:'\2713'; color:var(--accent); font-size:16px; font-weight:700;}
+.back-btn{
+  display:inline-flex; align-items:center; gap:6px; background:none; border:none;
+  color:var(--text-secondary); font-family:var(--font-body); font-size:13px;
+  padding:4px 0 10px; cursor:pointer;
+}
+.row-text{flex:1; min-width:0;}
+.row-text b{display:block; font-size:14px; font-weight:500; color:var(--text);}
+.row-text small{display:block; font-size:12px; margin-top:2px;}
+.settings-item select{width:112px; flex:none;}
+.danger-zone{margin-top:48px; padding-top:20px; border-top:0.5px dashed var(--border-strong);}
+.btn-danger-solid{background:var(--danger); color:#fff; border:none; font-weight:600;}
+.ftin{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+.latest-tag{font-size:11px; color:var(--recovery-text); background:var(--recovery-bg); padding:2px 8px; border-radius:8px; margin-left:6px; font-weight:500;}
+.faq-card{padding:4px 16px;}
+.faq-card details{border-top:0.5px solid var(--border);}
+.faq-card details:first-child{border-top:none;}
+.faq-card summary{padding:14px 0; font-size:15px; font-weight:600; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;}
+.faq-card summary::-webkit-details-marker{display:none;}
+.faq-card summary::after{content:'+'; color:var(--text-muted); font-size:18px;}
+.faq-card details[open] summary::after{content:'\2212';}
+.faq-body{padding:0 0 14px; font-size:13px; color:var(--text-secondary); line-height:1.55;}
+.faq-body ul{margin:0 0 10px; padding-left:18px;}
+.faq-body li{margin-bottom:6px;}
+.qa{margin-bottom:12px;}
+.qa b{display:block; color:var(--text); font-weight:500; margin-bottom:2px;}
+.qa p{margin:0;}
+#rest-display{font-family:var(--font-head); font-size:44px; font-weight:600; text-align:center; margin:6px 0 12px;}
+
+:root[data-theme="light"]{
+  --bg:#F6F4EF; --surface:#FFFFFF; --surface-2:#EFEDE6;
+  --border:rgba(20,19,15,0.10); --border-strong:rgba(20,19,15,0.20);
+  --text:#1B1A16; --text-secondary:#5E5A50; --text-muted:#8D887B;
+  --recovery:#178F81; --recovery-text:#0E6B60; --recovery-bg:rgba(23,143,129,0.12);
+  --danger:#C9382C;
+  --nav-bg:rgba(246,244,239,0.92); --grid-line:rgba(20,19,15,0.07);
+  color-scheme:light;
+}
+.swatches{display:flex; gap:12px; margin:12px 0 22px;}
+.swatch{width:36px; height:36px; border-radius:50%; border:2px solid transparent; padding:0; cursor:pointer; outline-offset:2px;}
+.swatch[aria-checked="true"]{border-color:var(--text); box-shadow:inset 0 0 0 3px var(--bg);}
+
+.auth-btn{
+  display:flex; align-items:center; justify-content:center; gap:12px; width:100%; min-height:48px;
+  padding:0 16px; border-radius:12px; border:0.5px solid var(--border-strong);
+  background:var(--surface-2); color:var(--text); font-family:var(--font-body);
+  font-size:15px; font-weight:500; cursor:pointer;
+}
+.auth-btn:active{transform:scale(0.99);}
+.auth-btn .ic{display:flex;}
+.auth-btn .ic svg{width:20px; height:20px;}
+.or-divider{display:flex; align-items:center; gap:12px; margin:14px 0; color:var(--text-muted); font-size:12px;}
+.or-divider::before,.or-divider::after{content:''; flex:1; height:0.5px; background:var(--border-strong);}
+#auth-email-form{margin-top:16px;}
+.acc-id{display:flex; align-items:center; gap:14px;}
+.acc-id .row-text b{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px;}
+.avatar{
+  width:46px; height:46px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+  background:var(--surface-2); border:0.5px solid var(--border-strong); color:var(--text);
+}
+.avatar svg{width:22px; height:22px;}
+.avatar.google{background:#FFFFFF;}
+</style>
+</head>
+<body>
+<h2 class="sr-only" data-i18n="srTitle"></h2>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">FORGE<span>.</span></div>
+    <div class="streak"><span id="hello"></span><i class="ic" data-ic="flame"></i> <span data-i18n="streak">4 วันติด</span></div>
+  </div>
+
+  <main>
+
+    <!-- PLAN -->
+    <section class="screen active" id="screen-plan">
+      <h1 class="page-title" data-i18n="plan.title">แผนของคุณ</h1>
+      <p class="page-sub" data-i18n="plan.sub"></p>
+
+      <div class="segment" id="plan-segment">
+        <button class="active" data-plan="gym" data-i18n="plan.gym">ยิม</button>
+        <button data-plan="cardio" data-i18n="plan.cardio">คาร์ดิโอ</button>
+        <button data-plan="yoga" data-i18n="plan.yoga">โยคะ</button>
+      </div>
+
+      <div id="plan-body"></div>
+    </section>
+
+    <!-- BODY -->
+    <section class="screen" id="screen-body">
+      <h1 class="page-title" data-i18n="body.title">ร่างกาย</h1>
+      <p class="page-sub" data-i18n="body.sub"></p>
+
+      <div class="card">
+        <p class="card-title" data-i18n="body.recTitle"></p>
+        <p class="card-sub" data-i18n="body.recSub"></p>
+        <div id="muscle-list"></div>
+      </div>
+
+      <div class="card">
+        <p class="card-title" data-i18n="calc.title"></p>
+        <p class="card-sub" data-i18n="calc.sub"></p>
+        <div class="calc-grid">
+          <div>
+            <label class="field-label" data-i18n="f.gender"></label>
+            <select id="calc-gender">
+              <option value="male" data-i18n="male"></option>
+              <option value="female" data-i18n="female"></option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label" data-i18n="f.age"></label>
+            <input id="calc-age" type="number" value="28" min="10" max="90">
+          </div>
+          <div>
+            <label class="field-label" id="calc-weight-label"></label>
+            <input id="calc-weight" type="number" value="68" min="30" max="200">
+          </div>
+          <div>
+            <label class="field-label" id="calc-height-label"></label>
+            <input id="calc-height" type="number" value="172" min="120" max="230">
+            <div class="ftin" id="calc-ftin" hidden>
+              <input id="calc-ft" type="number" min="3" max="7" data-i18n-ph="f.ft">
+              <input id="calc-in" type="number" min="0" max="11" data-i18n-ph="f.in">
+            </div>
+          </div>
+        </div>
+        <label class="field-label" data-i18n="f.activity"></label>
+        <select id="calc-activity" style="margin-bottom:14px;">
+          <option value="1.2" data-i18n="act.1.2"></option>
+          <option value="1.375" data-i18n="act.1.375"></option>
+          <option value="1.55" selected data-i18n="act.1.55"></option>
+          <option value="1.725" data-i18n="act.1.725"></option>
+          <option value="1.9" data-i18n="act.1.9"></option>
+        </select>
+        <div class="stat-grid" style="margin-bottom:0;">
+          <div class="stat-card">
+            <p class="stat-label">BMR</p>
+            <p class="stat-value" id="bmr-out">— <small>kcal</small></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label" data-i18n="calc.tdee"></p>
+            <p class="stat-value" id="tdee-out">— <small>kcal</small></p>
+          </div>
+        </div>
+        <p class="empty-hint" id="goal-out" style="padding-top:14px;"></p>
+      </div>
+    </section>
+
+    <!-- WORK -->
+    <section class="screen" id="screen-work">
+      <h1 class="page-title">Work</h1>
+      <p class="page-sub" data-i18n="work.sub"></p>
+
+      <div class="work-camera">
+        <div class="grid-overlay"></div>
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+        <div class="skeleton-placeholder">
+          <i class="ic" data-ic="camera" style="font-size:40px;"></i>
+          <div style="font-size:13px;" data-i18n="work.cam"></div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <span class="badge"><span class="badge-dot"></span><span data-i18n="work.badge"></span></span>
+        <span class="badge" data-i18n="work.reps"></span>
+      </div>
+
+      <button class="btn btn-accent" id="work-start-btn">เริ่มซ้อม</button>
+      <p class="empty-hint" data-i18n="work.hint"></p>
+
+      <div class="card" style="margin-top:16px;">
+        <p class="card-title" data-i18n="rest.title"></p>
+        <p class="card-sub" id="rest-sub"></p>
+        <div id="rest-display">1:30</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-accent" id="rest-start" data-i18n="rest.start"></button>
+          <button class="btn btn-ghost" id="rest-reset" style="width:38%;" data-i18n="rest.reset"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAINER / AI CHAT -->
+    <section class="screen" id="screen-chat">
+      <h1 class="page-title">Trainer</h1>
+      <p class="page-sub" data-i18n="chat.sub"></p>
+
+      <div class="chat-toggle" id="chat-toggle">
+        <button class="chip active" data-chat="trainer" data-i18n="chat.trainer"></button>
+        <button class="chip" data-chat="ai">AI chat</button>
+      </div>
+
+      <div class="card" style="padding-top:18px;">
+        <div id="chat-thread">
+        </div>
+        <div class="chat-input-row">
+          <input type="text" data-i18n-ph="chat.ph" disabled>
+          <button class="btn btn-sm" style="width:44px; flex-shrink:0;" disabled><i class="ic" data-ic="send"></i></button>
+        </div>
+      </div>
+      <p class="empty-hint" data-i18n="chat.hint"></p>
+    </section>
+
+    <!-- SETTING -->
+    <section class="screen" id="screen-setting">
+
+      <!-- HOME: menu list -->
+      <div id="set-home">
+        <h1 class="page-title" data-i18n="set.title">ตั้งค่า</h1>
+        <p class="page-sub" data-i18n="set.sub">จัดการบัญชีและการตั้งค่าแอป</p>
+
+        <div class="card menu-list">
+          <button class="menu-item" data-open="account"><span class="mi-icon"><i class="ic" data-ic="user"></i></span><span class="mi-text"><b>Account</b><small data-i18n="menu.account"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="body"><span class="mi-icon"><i class="ic" data-ic="body"></i></span><span class="mi-text"><b>Body Profile</b><small data-i18n="menu.body"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="unit"><span class="mi-icon"><i class="ic" data-ic="ruler"></i></span><span class="mi-text"><b>Units</b><small data-i18n="menu.unit"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="notif"><span class="mi-icon"><i class="ic" data-ic="bell"></i></span><span class="mi-text"><b>Notifications</b><small data-i18n="menu.notif"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="tracking"><span class="mi-icon"><i class="ic" data-ic="cam"></i></span><span class="mi-text"><b>Body Tracking</b><small data-i18n="menu.tracking"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="coach"><span class="mi-icon"><i class="ic" data-ic="spark"></i></span><span class="mi-text"><b>AI Coach</b><small data-i18n="menu.coach"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="devices"><span class="mi-icon"><i class="ic" data-ic="watch"></i></span><span class="mi-text"><b>Connected Devices</b><small data-i18n="menu.devices"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="lang"><span class="mi-icon"><i class="ic" data-ic="globe"></i></span><span class="mi-text"><b>Language</b><small id="menu-lang-sub"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="privacy"><span class="mi-icon"><i class="ic" data-ic="shield"></i></span><span class="mi-text"><b>Privacy &amp; Data</b><small data-i18n="menu.privacy"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="appearance"><span class="mi-icon"><i class="ic" data-ic="sun"></i></span><span class="mi-text"><b>Appearance</b><small data-i18n="menu.appearance"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="sub"><span class="mi-icon"><i class="ic" data-ic="card"></i></span><span class="mi-text"><b>Subscription</b><small data-i18n="menu.sub"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+          <button class="menu-item" data-open="about"><span class="mi-icon"><i class="ic" data-ic="info"></i></span><span class="mi-text"><b>About &amp; Help</b><small data-i18n="menu.about"></small></span><span class="chev"><i class="ic" data-ic="chev"></i></span></button>
+        </div>
+      </div>
+
+      <!-- SUB PAGE -->
+      <div id="set-page" hidden>
+        <button class="back-btn" id="set-back"><i class="ic" data-ic="back"></i><span data-i18n="set.title">ตั้งค่า</span></button>
+        <h1 class="page-title" id="set-page-title"></h1>
+        <p class="page-sub" id="set-page-sub"></p>
+
+        <!-- Account -->
+        <div class="set-sub" data-page="account" hidden>
+
+          <!-- signed out: Google or email only -->
+          <div id="acc-out">
+            <div class="card">
+              <p class="card-title" data-i18n="acc.signinTitle"></p>
+              <p class="card-sub" style="margin-bottom:16px;" data-i18n="acc.signinSub"></p>
+              <button class="auth-btn" id="auth-google"><i class="ic" data-ic="google"></i><span data-i18n="acc.google"></span></button>
+              <div class="or-divider"><span data-i18n="acc.or"></span></div>
+              <button class="auth-btn" id="auth-email-toggle" aria-expanded="false"><i class="ic" data-ic="mail"></i><span data-i18n="acc.email"></span></button>
+              <div id="auth-email-form" hidden>
+                <label class="field-label" for="auth-email" data-i18n="acc.emailLabel"></label>
+                <input id="auth-email" type="email" inputmode="email" autocomplete="email" data-i18n-ph="acc.emailPh">
+                <button class="btn btn-accent" id="auth-email-go" style="margin-top:12px;" data-i18n="acc.emailGo"></button>
+                <p class="set-msg err" id="auth-msg"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- signed in -->
+          <div id="acc-signed" hidden>
+            <div class="card acc-id">
+              <div class="avatar" id="acc-avatar"></div>
+              <div class="row-text"><b id="acc-via-label"></b><small id="acc-via-detail" style="color:var(--text-secondary);"></small></div>
+            </div>
+            <div class="card">
+              <label class="field-label" for="acc-name" data-i18n="acc.name"></label>
+              <input id="acc-name" type="text" maxlength="20" autocomplete="off" data-i18n-ph="acc.namePh">
+              <button class="btn btn-accent" id="acc-save" style="margin-top:12px;" data-i18n="acc.save"></button>
+              <p class="set-msg" id="acc-msg"></p>
+            </div>
+            <div class="danger-zone">
+              <button class="btn btn-ghost" id="acc-logout"></button>
+              <button class="btn btn-ghost btn-danger" id="acc-delete" style="margin-top:12px;" data-i18n="acc.delete"></button>
+              <div class="card" id="acc-del-panel" style="margin-top:12px;" hidden>
+                <p class="card-sub" style="margin-bottom:12px;" data-i18n="acc.deleteWarn"></p>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-ghost" id="acc-del-no" data-i18n="common.cancel"></button>
+                  <button class="btn btn-danger-solid" id="acc-del-yes" data-i18n="acc.deleteYes"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="empty-hint" data-i18n="acc.mock"></p>
+        </div>
+
+        <!-- Body Info -->
+        <div class="set-sub" data-page="body" hidden>
+          <div class="card">
+            <div class="calc-grid">
+              <div>
+                <label class="field-label" for="set-gender" data-i18n="f.gender"></label>
+                <select id="set-gender">
+                  <option value="male" data-i18n="male"></option>
+                  <option value="female" data-i18n="female"></option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="set-age" data-i18n="f.age"></label>
+                <input id="set-age" type="number" min="10" max="90">
+              </div>
+              <div>
+                <label class="field-label" for="set-weight" id="set-weight-label"></label>
+                <input id="set-weight" type="number" step="0.1">
+              </div>
+              <div>
+                <label class="field-label" for="set-height" id="set-height-label"></label>
+                <input id="set-height" type="number" min="120" max="230">
+                <div class="ftin" id="set-ftin" hidden>
+                  <input id="set-ft" type="number" min="3" max="7" data-i18n-ph="f.ft">
+                  <input id="set-in" type="number" min="0" max="11" data-i18n-ph="f.in">
+                </div>
+              </div>
+            </div>
+            <div class="set-field" style="margin-top:4px;">
+              <label class="field-label" for="set-goal" data-i18n="goal.label"></label>
+              <select id="set-goal">
+                <option value="lose" data-i18n="goal.lose"></option>
+                <option value="gain" data-i18n="goal.gain"></option>
+                <option value="maintain" data-i18n="goal.maintain"></option>
+              </select>
+            </div>
+            <button class="btn btn-accent" id="save-profile" data-i18n="acc.save"></button>
+            <p class="set-msg" id="profile-msg"></p>
+          </div>
+        </div>
+
+        <!-- Unit -->
+        <div class="set-sub" data-page="unit" hidden>
+          <div class="card">
+            <p class="card-title" data-i18n="unit.weight"></p>
+            <div class="segment" id="unit-w" style="margin:10px 0 20px;">
+              <button data-unit="kg" data-i18n="unit.kg"></button>
+              <button data-unit="lb" data-i18n="unit.lb"></button>
+            </div>
+            <p class="card-title" data-i18n="unit.height"></p>
+            <div class="segment" id="unit-h" style="margin:10px 0 0;">
+              <button data-hunit="cm" data-i18n="unit.cm"></button>
+              <button data-hunit="ftin" data-i18n="unit.ftin"></button>
+            </div>
+          </div>
+          <p class="empty-hint" data-i18n="unit.note"></p>
+        </div>
+
+        <!-- Notifications -->
+        <div class="set-sub" data-page="notif" hidden>
+          <div class="card">
+            <p class="card-title">Workout Reminder</p>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="n.workoutDesc"></b></div>
+                <button class="switch" id="sw-remind" role="switch" aria-checked="false" data-i18n-aria="n.workoutDesc"></button>
+              </div>
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="n.time"></b></div>
+                <input type="time" id="set-remind-time" value="18:00">
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <p class="card-title">Rest Timer</p>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="n.restDesc"></b></div>
+                <button class="switch" id="sw-rest" role="switch" aria-checked="false" data-i18n-aria="n.restDesc"></button>
+              </div>
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="n.restLen"></b></div>
+                <select id="set-rest">
+                  <option value="30">0:30</option>
+                  <option value="60">1:00</option>
+                  <option value="90">1:30</option>
+                  <option value="120">2:00</option>
+                  <option value="180">3:00</option>
+                </select>
+              </div>
+            </div>
+            <p class="card-sub" style="margin:10px 0 0;" data-i18n="n.restHint"></p>
+          </div>
+          <div class="card">
+            <p class="card-title">Recovery Reminder</p>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="n.recoveryDesc"></b></div>
+                <button class="switch" id="sw-recover" role="switch" aria-checked="false" data-i18n-aria="n.recoveryDesc"></button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost" id="test-notif" data-i18n="n.test"></button>
+          <p class="empty-hint" id="notif-hint"></p>
+        </div>
+
+        <!-- Connected Devices -->
+        <div class="set-sub" data-page="devices" hidden>
+          <div class="card">
+            <div id="dev-list"></div>
+            <button class="btn btn-accent" id="dev-add" data-i18n="dev.add"></button>
+            <p class="set-msg" id="dev-msg"></p>
+          </div>
+          <p class="empty-hint" data-i18n="dev.note"></p>
+        </div>
+
+        <!-- Language -->
+        <div class="set-sub" data-page="lang" hidden>
+          <div class="card menu-list" id="lang-list">
+            <button class="opt-row" role="radio" data-lang="th"><span>ไทย</span></button>
+            <button class="opt-row" role="radio" data-lang="en"><span>English</span></button>
+          </div>
+          <p class="empty-hint" data-i18n="lang.note"></p>
+        </div>
+
+        <!-- Subscription -->
+        <div class="set-sub" data-page="sub" hidden>
+          <div class="card" id="sub-card"></div>
+          <p class="empty-hint" data-i18n="sub.mock"></p>
+        </div>
+
+        <!-- Body Tracking -->
+        <div class="set-sub" data-page="tracking" hidden>
+          <div class="card">
+            <p class="card-title" data-i18n="trk.camera"></p>
+            <div class="segment" id="cam-seg" style="margin:10px 0 14px;">
+              <button data-cam="user" data-i18n="trk.front"></button>
+              <button data-cam="environment" data-i18n="trk.back"></button>
+            </div>
+            <button class="btn btn-ghost" id="cam-test" data-i18n="trk.test"></button>
+            <p class="set-msg" id="cam-msg"></p>
+          </div>
+          <div class="card">
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="trk.grid"></b></div>
+                <button class="switch" id="sw-grid" role="switch" aria-checked="false" data-i18n-aria="trk.grid"></button>
+              </div>
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="trk.skeleton"></b></div>
+                <button class="switch" id="sw-skel" role="switch" aria-checked="false" data-i18n-aria="trk.skeleton"></button>
+              </div>
+            </div>
+          </div>
+          <p class="empty-hint" data-i18n="trk.note"></p>
+        </div>
+
+        <!-- AI Coach -->
+        <div class="set-sub" data-page="coach" hidden>
+          <div class="card">
+            <p class="card-title" data-i18n="coach.tone"></p>
+            <div class="segment" id="coach-tone" style="margin:10px 0 20px;">
+              <button data-tone="friendly" data-i18n="coach.friendly"></button>
+              <button data-tone="strict" data-i18n="coach.strict"></button>
+              <button data-tone="neutral" data-i18n="coach.neutral"></button>
+            </div>
+            <p class="card-title" data-i18n="coach.detail"></p>
+            <div class="segment" id="coach-detail" style="margin:10px 0 0;">
+              <button data-detail="short" data-i18n="coach.short"></button>
+              <button data-detail="detailed" data-i18n="coach.detailed"></button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="coach.suggest"></b></div>
+                <button class="switch" id="sw-suggest" role="switch" aria-checked="false" data-i18n-aria="coach.suggest"></button>
+              </div>
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="coach.form"></b></div>
+                <button class="switch" id="sw-form" role="switch" aria-checked="false" data-i18n-aria="coach.form"></button>
+              </div>
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="coach.profile"></b></div>
+                <button class="switch" id="sw-cprofile" role="switch" aria-checked="false" data-i18n-aria="coach.profile"></button>
+              </div>
+            </div>
+          </div>
+          <p class="empty-hint" data-i18n="coach.note"></p>
+        </div>
+
+        <!-- Privacy & Data -->
+        <div class="set-sub" data-page="privacy" hidden>
+          <div class="card">
+            <p class="card-title" data-i18n="priv.what"></p>
+            <p class="card-sub" style="margin:6px 0 0; line-height:1.55;" data-i18n="priv.whatBody"></p>
+          </div>
+          <div class="card">
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="row-text"><b data-i18n="priv.hideName"></b></div>
+                <button class="switch" id="sw-hide" role="switch" aria-checked="false" data-i18n-aria="priv.hideName"></button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-ghost" id="export-data" data-i18n="priv.export"></button>
+          <button class="btn btn-ghost btn-danger" id="clear-data" style="margin-top:12px;"></button>
+          <p class="set-msg" id="priv-msg"></p>
+          <p class="empty-hint" data-i18n="priv.note"></p>
+        </div>
+
+        <!-- Appearance -->
+        <div class="set-sub" data-page="appearance" hidden>
+          <div class="card">
+            <p class="card-title" data-i18n="app.theme"></p>
+            <div class="segment" id="theme-seg" style="margin:10px 0 20px;">
+              <button data-theme-opt="dark" data-i18n="app.dark"></button>
+              <button data-theme-opt="light" data-i18n="app.light"></button>
+              <button data-theme-opt="system" data-i18n="app.system"></button>
+            </div>
+            <p class="card-title" data-i18n="app.accent"></p>
+            <div class="swatches" id="accent-list">
+              <button class="swatch" role="radio" data-accent="orange" style="background:#FF5A1F;" data-i18n-aria="ac.orange"></button>
+              <button class="swatch" role="radio" data-accent="blue" style="background:#3B82F6;" data-i18n-aria="ac.blue"></button>
+              <button class="swatch" role="radio" data-accent="green" style="background:#22C55E;" data-i18n-aria="ac.green"></button>
+              <button class="swatch" role="radio" data-accent="purple" style="background:#8B5CF6;" data-i18n-aria="ac.purple"></button>
+              <button class="swatch" role="radio" data-accent="pink" style="background:#EC4899;" data-i18n-aria="ac.pink"></button>
+            </div>
+            <p class="card-title" data-i18n="app.size"></p>
+            <div class="segment" id="size-seg" style="margin:10px 0 0;">
+              <button data-size="small" data-i18n="app.small"></button>
+              <button data-size="normal" data-i18n="app.normal"></button>
+              <button data-size="large" data-i18n="app.large"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- About & Help -->
+        <div class="set-sub" data-page="about" hidden>
+          <div class="card">
+            <div class="about-row"><span data-i18n="about.version"></span><b><span id="about-version"></span> <span class="latest-tag" data-i18n="about.latest"></span></b></div>
+          </div>
+          <div class="card faq-card">
+            <details>
+              <summary>Terms of service</summary>
+              <div class="faq-body">
+                <ul>
+                  <li data-i18n="tos.1"></li>
+                  <li data-i18n="tos.2"></li>
+                  <li data-i18n="tos.3"></li>
+                  <li data-i18n="tos.4"></li>
+                </ul>
+                <p class="card-sub" data-i18n="tos.draft"></p>
+              </div>
+            </details>
+            <details>
+              <summary>Privacy policy</summary>
+              <div class="faq-body">
+                <ul>
+                  <li data-i18n="pol.1"></li>
+                  <li data-i18n="pol.2"></li>
+                  <li data-i18n="pol.3"></li>
+                  <li data-i18n="pol.4"></li>
+                </ul>
+                <p class="card-sub" data-i18n="tos.draft"></p>
+              </div>
+            </details>
+            <details>
+              <summary>Help</summary>
+              <div class="faq-body">
+                <div class="qa"><b data-i18n="help.q1"></b><p data-i18n="help.a1"></p></div>
+                <div class="qa"><b data-i18n="help.q2"></b><p data-i18n="help.a2"></p></div>
+                <div class="qa"><b data-i18n="help.q3"></b><p data-i18n="help.a3"></p></div>
+                <div class="qa"><b data-i18n="help.q4"></b><p data-i18n="help.a4"></p></div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <nav class="bottombar">
+    <button class="nav-item active" data-screen="plan"><i class="ic" data-ic="list"></i><span>Plan</span></button>
+    <button class="nav-item" data-screen="body"><i class="ic" data-ic="body"></i><span>Body</span></button>
+    <button class="nav-item work-btn" data-screen="work">
+      <div class="work-circle"><i class="ic" data-ic="camera"></i></div>
+      <span>Work</span>
+    </button>
+    <button class="nav-item" data-screen="chat"><i class="ic" data-ic="chat"></i><span>Trainer</span></button>
+    <button class="nav-item" data-screen="setting"><i class="ic" data-ic="settings"></i><span>Setting</span></button>
+  </nav>
+</div>
+
+<script>
+/* ---------- minimal inline icon set (no external icon font) ---------- */
+const ICONS = {
+  flame:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2-1-3.5 2 1 3 3.5 3 5.5a6 6 0 0 1-12 0C6 8 9 6 12 2z"/></svg>',
+  list:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  body:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2.4"/><path d="M12 8.5v6M8.5 11h7M9 20l3-5.5L15 20"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.2-1.6l2-1.6-2-3.4-2.4.8a7 7 0 0 0-2.8-1.6L13 2h-4l-.6 2.6a7 7 0 0 0-2.8 1.6l-2.4-.8-2 3.4 2 1.6A7 7 0 0 0 3 12c0 .5.1 1.1.2 1.6l-2 1.6 2 3.4 2.4-.8a7 7 0 0 0 2.8 1.6L11 22h4l.6-2.6a7 7 0 0 0 2.8-1.6l2.4.8 2-3.4-2-1.6c.1-.5.2-1.1.2-1.6z"/></svg>',
+  user:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5 1.5 6H4.5C4.5 15 6 14 6 10z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>',
+  ruler:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M7 8v3M11 8v3M15 8v3"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>',
+  info:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  send:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>',
+  watch:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6l.6-3h4.8L15 6M9 18l.6 3h4.8l.6-3"/></svg>',
+  globe:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
+  card:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="3" y1="10.5" x2="21" y2="10.5"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>',
+  google:'<svg viewBox="0 0 48 48" width="18" height="18"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>',
+  back:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>'
+};
+function paintIcons(root){
+  (root||document).querySelectorAll('i.ic[data-ic]').forEach(el=>{
+    const k = el.getAttribute('data-ic');
+    if(ICONS[k]) el.innerHTML = ICONS[k];
+  });
+}
+paintIcons();
+
+/* ---------- bottom nav + screen switching ---------- */
+const navItems = document.querySelectorAll('.nav-item');
+const screens = document.querySelectorAll('.screen');
+navItems.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = btn.getAttribute('data-screen');
+    navItems.forEach(b=>b.classList.toggle('active', b===btn));
+    screens.forEach(s=>s.classList.toggle('active', s.id === 'screen-'+target));
+    if(target === 'setting') showSetPage(null);
+  });
+});
+
+/* ---------- settings state (saved on this device) ---------- */
+const SETTINGS_KEY = 'forge-settings-v1';
+const APP_VERSION = '1.0.0'; /* bump this on every release; shown in Settings > About */
+const LB_PER_KG = 2.20462, CM_PER_IN = 2.54;
+const SETTINGS_DEFAULTS = {
+  lang:'th', authMethod:null, email:'', name:'',
+  gender:'male', age:28, weightKg:68, heightCm:172,
+  unit:'kg', hUnit:'cm',
+  remindOn:false, remindTime:'18:00', lastRemindDate:'',
+  restOn:false, restSec:90, recoverOn:false,
+  lastDevice:'', sub:{plan:null, expires:null, cancelled:false, pending:null},
+  goal:'maintain', camFacing:'user', gridOn:true, skelOn:true,
+  coachTone:'friendly', coachDetail:'short', coachSuggest:true, coachForm:true, coachProfile:true,
+  hideName:false, theme:'dark', accent:'orange', textSize:'normal'
+};
+const freshDefaults = () => JSON.parse(JSON.stringify(SETTINGS_DEFAULTS));
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      if(!('authMethod' in saved)) saved.authMethod = (saved.loggedIn && saved.googleLinked) ? 'google' : null; /* older saves */
+      delete saved.loggedIn; delete saved.googleLinked;
+      return Object.assign(freshDefaults(), saved);
+    }
+  }catch(e){}
+  return freshDefaults();
+}
+function saveSettings(){
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(S)); }catch(e){}
+}
+let S = loadSettings();
+
+/* ---------- i18n ---------- */
+const I18N = {
+th:{
+  srTitle:'แอปออกกำลังกายสำหรับเข้ายิม มีแท็บวางแผน ติดตามสภาพร่างกาย กล้อง AI ติดตามท่าทาง แชทกับเทรนเนอร์ และตั้งค่า',
+  streak:'4 วันติด',
+  'plan.title':'แผนของคุณ','plan.sub':'เลือกประเภทการฝึก แล้วปรับท่าออกกำลังกายให้เข้ากับเป้าหมายวันนี้',
+  'plan.gym':'ยิม','plan.cardio':'คาร์ดิโอ','plan.yoga':'โยคะ',
+  'plan.cardTitle':'แผน{type}วันนี้',
+  'plan.u.gym':'เซต × ครั้ง ({w})','plan.u.cardio':'รอบ / เวลา','plan.u.yoga':'เซต / ค้างท่า',
+  'plan.sets':'{n} เซต','plan.remove':'ลบท่านี้','plan.empty':'ยังไม่มีท่าในแผนนี้ เพิ่มท่าแรกได้เลย',
+  'plan.namePh':'ชื่อท่าออกกำลังกาย','plan.setsPh':'เซต','plan.repsPh':'ครั้ง/เวลา','plan.nameReq':'กรอกชื่อท่าก่อนเพิ่ม','plan.add':'เพิ่มท่าออกกำลังกาย',
+  'ex.bench':'เบนช์เพรส','ex.squat':'สควอท','ex.pullup':'ดึงข้อบาร์','ex.curl':'ดัมเบลเคิร์ล','ex.run':'วิ่งบนลู่','ex.bike':'ปั่นจักรยาน','ex.rope':'กระโดดเชือก',
+  'ex.sun':'Sun salutation','ex.warrior':'ท่านักรบ (Warrior II)','ex.child':'ท่าเด็ก (Child pose)',
+  'r.20min':'20 นาที','r.15min':'15 นาที','r.2min':'2 นาที','r.rounds':'รอบ','r.30s':'30 วิ/ข้าง','r.1min':'1 นาที',
+  'body.title':'ร่างกาย','body.sub':'ติดตามความล้าของกล้ามเนื้อ เวลาพักที่เหลือ และพลังงานที่ใช้',
+  'body.recTitle':'การพักฟื้นของกล้ามเนื้อ','body.recSub':'แตะ "ฝึกแล้ว" หลังซ้อมเพื่อเริ่มนับเวลาพักใหม่',
+  'm.chest':'อก','m.back':'หลัง','m.legs':'ขา','m.shoulders':'ไหล่','m.arms':'แขน',
+  'm.ready':'พร้อมฝึก','m.left':'เหลือ {h} ชม.','m.train':'ฝึก{m}แล้ว · เริ่มนับพักใหม่',
+  'calc.title':'คำนวณพลังงานที่ใช้ต่อวัน (TDEE)','calc.sub':'กรอกข้อมูลร่างกายเพื่อประเมินแคลอรี่ที่ควรได้รับ','calc.tdee':'TDEE โดยประมาณ',
+  'f.gender':'เพศ','male':'ชาย','female':'หญิง','f.age':'อายุ','f.weight':'น้ำหนัก ({u})','f.height':'ส่วนสูง ({u})','f.heightFtIn':'ส่วนสูง (ฟุต / นิ้ว)','f.ft':'ฟุต','f.in':'นิ้ว','f.activity':'ระดับกิจกรรม',
+  'act.1.2':'น้อยมาก (นั่งทำงาน ไม่ค่อยขยับ)','act.1.375':'น้อย (ออกกำลังกาย 1-3 วัน/สัปดาห์)','act.1.55':'ปานกลาง (ออกกำลังกาย 3-5 วัน/สัปดาห์)','act.1.725':'มาก (ออกกำลังกาย 6-7 วัน/สัปดาห์)','act.1.9':'มากที่สุด (นักกีฬา / ใช้แรงงานหนัก)',
+  'u.kg':'กก.','u.lb':'ปอนด์','u.cm':'ซม.',
+  'work.sub':'เปิดกล้องเพื่อให้ระบบช่วยจับท่าทางระหว่างซ้อม','work.cam':'มุมกล้องจะแสดงที่นี่','work.badge':'AI body tracking · กำลังพัฒนา','work.reps':'0 ครั้ง','work.start':'เริ่มซ้อม','work.stop':'หยุดซ้อม','work.hint':'ตอนนี้เป็นเพียงหน้าตา UI ระบบนับท่าทางอัตโนมัติยังไม่เปิดใช้งาน',
+  'rest.title':'จับเวลาพักระหว่างเซต','rest.sub':'พัก {d} ต่อเซต (ปรับได้ที่ Settings → Notifications)','rest.start':'เริ่มพัก','rest.reset':'รีเซ็ต','rest.done':'พักครบแล้ว',
+  'chat.sub':'คุยกับเทรนเนอร์จริงหรือผู้ช่วย AI','chat.trainer':'เทรนเนอร์','chat.ph':'พิมพ์ข้อความ… (ยังใช้งานไม่ได้)','chat.hint':'ส่วนนี้เป็น placeholder รอเชื่อมระบบแชทจริงในอนาคต',
+  'chat.t1':'สวัสดีครับ วันนี้อยากซ้อมส่วนไหนดี','chat.t2':'อยากเน้นอกกับไทรเซปส์ครับ','chat.t3':'โอเค เดี๋ยวจัดโปรแกรมให้ในแท็บ Plan นะ',
+  'chat.a1':'สวัสดี ให้ AI ช่วยวางแผนซ้อมวันนี้ไหม','chat.a2':'ช่วยแนะนำท่าคาร์ดิโอเบาๆ หน่อย','chat.a3':'แนะนำ: เดินเร็ว 20 นาที + ปั่นจักรยาน 10 นาที',
+  'set.title':'ตั้งค่า','set.sub':'จัดการบัญชีและการตั้งค่าแอป','common.cancel':'ยกเลิก',
+  'menu.account':'บัญชีและการเข้าสู่ระบบ','menu.body':'ข้อมูลร่างกายและเป้าหมาย','menu.unit':'kg / lb และ cm / ft + in','menu.notif':'การแจ้งเตือนและเวลาพัก',
+  'menu.devices':'อุปกรณ์และแอปที่เชื่อมต่อ','menu.lang':'ภาษา','menu.sub':'แผนสมาชิก (เมื่อมีระบบจริง)','menu.about':'เวอร์ชัน นโยบาย และความช่วยเหลือ',
+  'acc.name':'ชื่อ','acc.namePh':'ชื่อเล่นของคุณ','acc.save':'บันทึก','acc.saved':'บันทึกแล้ว',
+  'acc.linked':'เชื่อมต่อแล้ว','acc.unlinked':'ยังไม่ได้เชื่อมต่อ','acc.link':'เชื่อมต่อ','acc.unlink':'ยกเลิกการเชื่อมต่อ',
+  'acc.logout':'ออกจากระบบ','acc.logoutConfirm':'แตะอีกครั้งเพื่อออกจากระบบ','acc.delete':'ลบบัญชี',
+  'acc.deleteWarn':'การลบบัญชีจะลบข้อมูลที่บันทึกไว้ทั้งหมดในเครื่องนี้ และย้อนกลับไม่ได้','acc.deleteYes':'ลบถาวร',
+  'acc.signedOut':'คุณออกจากระบบแล้ว','acc.signedOutSub':'เข้าสู่ระบบเพื่อจัดการชื่อและบัญชี Google','acc.login':'เข้าสู่ระบบ',
+  'acc.mock':'การเข้าสู่ระบบด้วย Google และอีเมลเป็นแบบจำลอง ยังไม่ได้เชื่อมกับระบบบัญชีจริง',
+  'acc.signinTitle':'เข้าสู่ระบบ','acc.signinSub':'เลือกวิธีเข้าสู่ระบบ','acc.google':'ดำเนินการต่อด้วย Google','acc.email':'ดำเนินการต่อด้วยอีเมล','acc.or':'หรือ',
+  'acc.emailLabel':'อีเมล','acc.emailPh':'name@example.com','acc.emailGo':'เข้าสู่ระบบ','acc.emailErr':'กรอกอีเมลให้ถูกต้อง','acc.viaGoogle':'เข้าสู่ระบบด้วย Google','acc.viaEmail':'เข้าสู่ระบบด้วยอีเมล',
+  'toast.loggedOut':'ออกจากระบบแล้ว','toast.loggedIn':'เข้าสู่ระบบแล้ว','toast.deleted':'ลบบัญชีและข้อมูลในเครื่องแล้ว',
+  'body.err.age':'อายุต้องอยู่ระหว่าง 10–90 ปี','body.err.weight':'น้ำหนักต้องอยู่ระหว่าง {a}–{b} {u}','body.err.height':'ส่วนสูงต้องอยู่ระหว่าง {r}','body.saved':'บันทึกแล้ว และอัปเดตเครื่องคำนวณ TDEE ให้เรียบร้อย',
+  'unit.weight':'น้ำหนัก','unit.height':'ส่วนสูง','unit.kg':'กิโลกรัม (kg)','unit.lb':'ปอนด์ (lb)','unit.cm':'เซนติเมตร (cm)','unit.ftin':'ฟุตและนิ้ว (ft + in)',
+  'unit.note':'ใช้กับแผนซ้อม เครื่องคำนวณ TDEE และข้อมูลร่างกาย',
+  'n.workoutDesc':'เตือนให้ซ้อมทุกวัน','n.time':'เวลาที่เตือน','n.restDesc':'แจ้งเมื่อเวลาพักระหว่างเซตหมด','n.restLen':'เวลาพักต่อเซต','n.restHint':'เริ่มจับเวลาพักได้ที่แท็บ Work',
+  'n.recoveryDesc':'แจ้งเมื่อกล้ามเนื้อพักครบ','n.test':'ทดสอบการแจ้งเตือน','n.hint':'แจ้งเตือนจะทำงานเมื่อเปิดหน้าแอปค้างไว้ในเบราว์เซอร์',
+  'n.denied':'เบราว์เซอร์ยังไม่อนุญาตการแจ้งเตือน ต้องเปิดสิทธิ์ให้เว็บนี้ในการตั้งค่าเบราว์เซอร์ก่อน','n.unsupported':'เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน','n.ok':'การแจ้งเตือนใช้งานได้ปกติ',
+  'n.workoutTitle':'ถึงเวลาซ้อมแล้ว','n.workoutBody':'เปิด FORGE เพื่อดูแผนของวันนี้','n.recTitle':'พร้อมฝึกแล้ว','n.recBody':'{m}พักครบ {h} ชม. พร้อมซ้อมอีกครั้ง','n.restTitle':'พักครบแล้ว','n.restBody':'ถึงเวลาเริ่มเซตถัดไป',
+  'dev.empty':'ยังไม่มีอุปกรณ์ที่เชื่อมต่อ','dev.add':'เพิ่มอุปกรณ์ Bluetooth','dev.connected':'เชื่อมต่ออยู่','dev.disconnected':'ไม่ได้เชื่อมต่อ','dev.connect':'เชื่อมต่อ','dev.disconnect':'ยกเลิกการเชื่อมต่อ',
+  'dev.generic':'อุปกรณ์ Bluetooth','dev.unsupported':'เบราว์เซอร์นี้ไม่รองรับ Bluetooth','dev.cancelled':'ไม่ได้เลือกอุปกรณ์','dev.failed':'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง',
+  'dev.note':'รองรับสายรัดหัวใจและนาฬิกาที่ส่งข้อมูลหัวใจผ่าน Bluetooth (Chrome / Edge บน Android และคอมพิวเตอร์ ส่วน iPhone Safari ยังไม่รองรับ) ตอนนี้แอปเชื่อมต่อและแสดงสถานะได้ แต่ยังไม่ได้นำข้อมูลหัวใจไปใช้',
+  'lang.note':'เปลี่ยนภาษาของทั้งแอปทันที',
+  'sub.status':'สถานะ','sub.none':'ยังไม่ได้สมัคร','sub.active':'ใช้งานอยู่','sub.cancelled':'ยกเลิกแล้ว ใช้ได้ถึงวันหมดอายุ','sub.expired':'หมดอายุแล้ว',
+  'sub.plan':'แผน','sub.monthly':'รายเดือน','sub.yearly':'รายปี','sub.expiry':'วันหมดอายุ','sub.choose':'เลือกแผน','sub.subscribe':'สมัครสมาชิก','sub.renew':'ต่ออายุ',
+  'sub.cancel':'ยกเลิกการสมัคร','sub.cancelConfirm':'แตะอีกครั้งเพื่อยืนยันการยกเลิก','sub.mock':'เป็นตัวอย่างการสมัคร ยังไม่มีการเรียกเก็บเงินจริง',
+  'toast.subscribed':'สมัครสมาชิกแล้ว','toast.planSet':'ตั้งแผนรอบถัดไปแล้ว','toast.planKeep':'ยกเลิกการเปลี่ยนแผนแล้ว',
+  'sub.change':'เปลี่ยนแผน','sub.next':'แผนรอบถัดไป','sub.changeNote':'เปลี่ยนระหว่างรายเดือนและรายปีได้ตลอด โดยแผนใหม่จะเริ่มเมื่อต่ออายุรอบถัดไป','sub.pendingInfo':'จะเปลี่ยนเป็น{p}ตั้งแต่ {d}','sub.pendingOnRenew':'จะใช้แผน{p}เมื่อสมัครต่อ','toast.renewed':'ต่ออายุแล้ว','toast.cancelled':'ยกเลิกการสมัครแล้ว',
+  'about.version':'เวอร์ชัน','about.latest':'ล่าสุด',
+  'tos.1':'FORGE ให้ข้อมูลเพื่อการออกกำลังกายทั่วไป ไม่ใช่คำแนะนำทางการแพทย์ หากมีโรคประจำตัวหรืออาการบาดเจ็บ ควรปรึกษาแพทย์ก่อนเริ่มโปรแกรม',
+  'tos.2':'ค่าที่คำนวณ เช่น BMR และ TDEE เป็นเพียงค่าประมาณ','tos.3':'ข้อมูลการตั้งค่าถูกเก็บไว้ในเบราว์เซอร์ของเครื่องนี้ ไม่ได้ส่งไปยังเซิร์ฟเวอร์','tos.4':'แอปนี้เป็นต้นแบบ ฟีเจอร์อาจเปลี่ยนแปลงได้',
+  'tos.draft':'ข้อความฉบับร่างสำหรับต้นแบบ ควรให้ผู้เชี่ยวชาญตรวจสอบก่อนใช้งานจริง',
+  'help.q1':'เพิ่มหรือลบท่าออกกำลังกายได้อย่างไร','help.a1':'ไปที่แท็บ Plan พิมพ์ชื่อท่า จำนวนเซต และครั้ง แล้วกด "เพิ่มท่าออกกำลังกาย" ส่วนการลบให้กดปุ่ม ✕ ข้างท่านั้น',
+  'help.q2':'เวลาพักของกล้ามเนื้อนับอย่างไร','help.a2':'แต่ละส่วนต้องพัก 48 ชั่วโมงหลังซ้อม กด "ฝึกแล้ว" ในแท็บ Body เพื่อเริ่มนับใหม่',
+  'help.q3':'ทำไมการแจ้งเตือนไม่เด้ง','help.a3':'ต้องอนุญาตการแจ้งเตือนให้เว็บนี้ในเบราว์เซอร์ และเปิดหน้าแอปค้างไว้ ลองกด "ทดสอบการแจ้งเตือน" ใน Notifications',
+  'help.q4':'ข้อมูลของฉันเก็บไว้ที่ไหน','help.a4':'เก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น ถ้าเปลี่ยนเครื่องหรือล้างข้อมูลเบราว์เซอร์ ค่าตั้งค่าจะหายไป',
+  'menu.tracking':'กล้องและการตรวจจับท่าทาง','menu.coach':'การตั้งค่าคำแนะนำ AI','menu.privacy':'ความเป็นส่วนตัวและข้อมูล','menu.appearance':'ธีมและการแสดงผล',
+  'goal.label':'เป้าหมาย','goal.lose':'ลดไขมัน','goal.gain':'เพิ่มกล้ามเนื้อ','goal.maintain':'รักษาสุขภาพ','goal.out':'แคลอรี่ต่อวันตามเป้าหมาย ({g}): {k} kcal',
+  'trk.camera':'กล้องที่ใช้','trk.front':'กล้องหน้า','trk.back':'กล้องหลัง','trk.test':'ทดสอบกล้อง',
+  'trk.grid':'แสดงเส้นกริดช่วยจัดมุมกล้อง','trk.skeleton':'แสดงโครงร่างท่าทางทับภาพ',
+  'trk.note':'เส้นกริดใช้ได้ทันทีที่แท็บ Work ส่วนกล้องที่เลือกและโครงร่างท่าทางจะถูกใช้เมื่อระบบตรวจจับท่าทางเปิดใช้งาน',
+  'trk.ok':'กล้องใช้งานได้','trk.denied':'เบราว์เซอร์ไม่อนุญาตให้ใช้กล้อง ต้องเปิดสิทธิ์ให้เว็บนี้ก่อน','trk.none':'ไม่พบกล้องในอุปกรณ์นี้','trk.unsupported':'เบราว์เซอร์นี้ใช้กล้องไม่ได้ (ต้องเปิดผ่าน https หรือไฟล์ในเครื่อง)','trk.fail':'เปิดกล้องไม่สำเร็จ',
+  'coach.tone':'สไตล์การโค้ช','coach.friendly':'ให้กำลังใจ','coach.strict':'เข้มงวด','coach.neutral':'กลางๆ',
+  'coach.detail':'ความละเอียดของคำแนะนำ','coach.short':'สั้นกระชับ','coach.detailed':'ละเอียด',
+  'coach.suggest':'แนะนำท่าและแผนซ้อมให้อัตโนมัติ','coach.form':'เตือนเมื่อท่าทางไม่ถูกต้อง','coach.profile':'ใช้ข้อมูลร่างกายของฉันในคำแนะนำ',
+  'coach.note':'ค่าเหล่านี้ถูกบันทึกไว้ และจะใช้เมื่อแชท AI เปิดใช้งานจริง ตอนนี้แท็บ Trainer ยังเป็นตัวอย่าง',
+  'priv.what':'ข้อมูลที่เก็บในเครื่องนี้','priv.whatBody':'ชื่อ ข้อมูลร่างกายและเป้าหมาย หน่วยวัด การแจ้งเตือน ภาษา ธีม และสถานะสมาชิกแบบจำลอง เก็บไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ได้ส่งไปที่ใด และแอปไม่บันทึกภาพจากกล้อง',
+  'priv.hideName':'ซ่อนชื่อบนหน้าแรก','priv.export':'ดาวน์โหลดข้อมูลของฉัน (JSON)','priv.clear':'ล้างข้อมูลการใช้งานในเครื่อง','priv.clearConfirm':'แตะอีกครั้งเพื่อยืนยันการล้างข้อมูล',
+  'priv.note':'การล้างข้อมูลจะรีเซ็ตข้อมูลร่างกาย หน่วย การแจ้งเตือน อุปกรณ์ กล้อง AI Coach และธีม แต่ยังคงบัญชี ภาษา และสถานะสมาชิกไว้',
+  'priv.exported':'ดาวน์โหลดแล้ว','priv.cleared':'ล้างข้อมูลในเครื่องแล้ว',
+  'app.theme':'ธีม','app.dark':'มืด','app.light':'สว่าง','app.system':'ตามระบบ','app.accent':'สีเน้น','app.size':'ขนาดตัวอักษร','app.small':'เล็ก','app.normal':'ปกติ','app.large':'ใหญ่',
+  'ac.orange':'ส้ม','ac.blue':'น้ำเงิน','ac.green':'เขียว','ac.purple':'ม่วง','ac.pink':'ชมพู',
+  'pol.1':'ข้อมูลที่คุณกรอกถูกเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น','pol.2':'แอปไม่บันทึกหรืออัปโหลดภาพจากกล้อง','pol.3':'คุณดาวน์โหลดหรือล้างข้อมูลของคุณได้ทุกเมื่อที่ Settings → Privacy & Data','pol.4':'หน้าเว็บโหลดฟอนต์จาก Google Fonts ซึ่งเป็นบริการภายนอก'
+},
+en:{
+  srTitle:'Gym workout app with plan, body recovery tracking, AI pose-tracking camera, trainer chat and settings',
+  streak:'4-day streak',
+  'plan.title':'Your plan','plan.sub':"Pick a training type, then adjust the exercises to fit today's goal",
+  'plan.gym':'Gym','plan.cardio':'Cardio','plan.yoga':'Yoga',
+  'plan.cardTitle':"Today's plan · {type}",
+  'plan.u.gym':'sets × reps ({w})','plan.u.cardio':'rounds / time','plan.u.yoga':'sets / hold',
+  'plan.sets':'{n} sets','plan.remove':'Remove exercise','plan.empty':'No exercises in this plan yet. Add your first one.',
+  'plan.namePh':'Exercise name','plan.setsPh':'Sets','plan.repsPh':'Reps / time','plan.nameReq':'Enter a name first','plan.add':'Add exercise',
+  'ex.bench':'Bench press','ex.squat':'Squat','ex.pullup':'Pull-up','ex.curl':'Dumbbell curl','ex.run':'Treadmill run','ex.bike':'Cycling','ex.rope':'Jump rope',
+  'ex.sun':'Sun salutation','ex.warrior':'Warrior II','ex.child':'Child pose',
+  'r.20min':'20 min','r.15min':'15 min','r.2min':'2 min','r.rounds':'rounds','r.30s':'30 s/side','r.1min':'1 min',
+  'body.title':'Body','body.sub':'Track muscle fatigue, remaining rest time and energy use',
+  'body.recTitle':'Muscle recovery','body.recSub':'Tap "Trained" after a session to restart the rest timer',
+  'm.chest':'Chest','m.back':'Back','m.legs':'Legs','m.shoulders':'Shoulders','m.arms':'Arms',
+  'm.ready':'Ready','m.left':'{h} h left','m.train':'{m} trained · restart rest',
+  'calc.title':'Daily energy expenditure (TDEE)','calc.sub':'Enter your body details to estimate daily calories','calc.tdee':'Estimated TDEE',
+  'f.gender':'Gender','male':'Male','female':'Female','f.age':'Age','f.weight':'Weight ({u})','f.height':'Height ({u})','f.heightFtIn':'Height (ft / in)','f.ft':'ft','f.in':'in','f.activity':'Activity level',
+  'act.1.2':'Sedentary (desk job, little movement)','act.1.375':'Light (exercise 1-3 days/week)','act.1.55':'Moderate (exercise 3-5 days/week)','act.1.725':'Heavy (exercise 6-7 days/week)','act.1.9':'Extreme (athlete / physical labor)',
+  'u.kg':'kg','u.lb':'lb','u.cm':'cm',
+  'work.sub':'Open the camera so the system can track your form during training','work.cam':'Camera view appears here','work.badge':'AI body tracking · in development','work.reps':'0 reps','work.start':'Start workout','work.stop':'Stop workout','work.hint':'This is a UI mock-up only; automatic rep counting is not active yet',
+  'rest.title':'Rest timer between sets','rest.sub':'Rest {d} per set (change it in Settings → Notifications)','rest.start':'Start rest','rest.reset':'Reset','rest.done':'Rest is over',
+  'chat.sub':'Chat with a real trainer or the AI assistant','chat.trainer':'Trainer','chat.ph':'Type a message… (not available yet)','chat.hint':'This section is a placeholder until real chat is connected',
+  'chat.t1':'Hi! Which body part do you want to train today?','chat.t2':'I want to focus on chest and triceps','chat.t3':"OK, I'll set up a program in the Plan tab",
+  'chat.a1':"Hi! Want the AI to help plan today's workout?",'chat.a2':'Suggest some light cardio','chat.a3':'Suggestion: brisk walk 20 min + cycling 10 min',
+  'set.title':'Settings','set.sub':'Manage your account and app settings','common.cancel':'Cancel',
+  'menu.account':'Account and sign-in','menu.body':'Body and goals','menu.unit':'kg / lb and cm / ft + in','menu.notif':'Reminders and rest time',
+  'menu.devices':'Connected devices and apps','menu.lang':'Language','menu.sub':'Plan (once a real system exists)','menu.about':'Version, policy and help',
+  'acc.name':'Name','acc.namePh':'Your nickname','acc.save':'Save','acc.saved':'Saved',
+  'acc.linked':'Connected','acc.unlinked':'Not connected','acc.link':'Connect','acc.unlink':'Disconnect',
+  'acc.logout':'Log out','acc.logoutConfirm':'Tap again to log out','acc.delete':'Delete account',
+  'acc.deleteWarn':'Deleting your account permanently removes all data saved on this device. This cannot be undone.','acc.deleteYes':'Delete permanently',
+  'acc.signedOut':'You are logged out','acc.signedOutSub':'Log in to manage your name and Google account','acc.login':'Log in',
+  'acc.mock':'Google and email sign-in are simulated; they are not connected to a real account system yet',
+  'acc.signinTitle':'Log in','acc.signinSub':'Choose how to log in','acc.google':'Continue with Google','acc.email':'Continue with email','acc.or':'or',
+  'acc.emailLabel':'Email','acc.emailPh':'name@example.com','acc.emailGo':'Log in','acc.emailErr':'Enter a valid email address','acc.viaGoogle':'Signed in with Google','acc.viaEmail':'Signed in with email',
+  'toast.loggedOut':'Logged out','toast.loggedIn':'Logged in','toast.deleted':'Account and on-device data deleted',
+  'body.err.age':'Age must be between 10 and 90','body.err.weight':'Weight must be between {a} and {b} {u}','body.err.height':'Height must be between {r}','body.saved':'Saved and applied to the TDEE calculator',
+  'unit.weight':'Weight','unit.height':'Height','unit.kg':'Kilograms (kg)','unit.lb':'Pounds (lb)','unit.cm':'Centimeters (cm)','unit.ftin':'Feet and inches (ft + in)',
+  'unit.note':'Applies to the plan, the TDEE calculator and Body Info',
+  'n.workoutDesc':'Remind me to train every day','n.time':'Reminder time','n.restDesc':'Alert when the rest between sets ends','n.restLen':'Rest per set','n.restHint':'Start the rest timer from the Work tab',
+  'n.recoveryDesc':'Alert when a muscle is fully rested','n.test':'Test notification','n.hint':'Notifications work while the app stays open in your browser',
+  'n.denied':'Notifications are blocked. Allow them for this site in your browser settings first.','n.unsupported':'This browser does not support notifications','n.ok':'Notifications are working',
+  'n.workoutTitle':'Time to train','n.workoutBody':"Open FORGE to see today's plan",'n.recTitle':'Ready to train','n.recBody':'{m} has rested {h} h and is ready again','n.restTitle':'Rest is over','n.restBody':'Time for your next set',
+  'dev.empty':'No connected devices yet','dev.add':'Add Bluetooth device','dev.connected':'Connected','dev.disconnected':'Disconnected','dev.connect':'Connect','dev.disconnect':'Disconnect',
+  'dev.generic':'Bluetooth device','dev.unsupported':'This browser does not support Bluetooth','dev.cancelled':'No device selected','dev.failed':'Could not connect. Please try again.',
+  'dev.note':'Works with heart-rate straps and watches that broadcast heart rate over Bluetooth (Chrome / Edge on Android and desktop; iPhone Safari is not supported). The app can connect and show status, but does not use the heart-rate data yet.',
+  'lang.note':'Changes the language of the whole app instantly',
+  'sub.status':'Status','sub.none':'Not subscribed','sub.active':'Active','sub.cancelled':'Cancelled — active until expiry','sub.expired':'Expired',
+  'sub.plan':'Plan','sub.monthly':'Monthly','sub.yearly':'Yearly','sub.expiry':'Expires on','sub.choose':'Choose a plan','sub.subscribe':'Subscribe','sub.renew':'Renew',
+  'sub.cancel':'Cancel subscription','sub.cancelConfirm':'Tap again to confirm cancellation','sub.mock':'Demo subscription; no real billing happens',
+  'toast.subscribed':'Subscribed','toast.planSet':'Next plan set','toast.planKeep':'Plan change removed',
+  'sub.change':'Change plan','sub.next':'Next plan','sub.changeNote':'Switch between monthly and yearly any time; the new plan starts at your next renewal.','sub.pendingInfo':'Switches to {p} on {d}','sub.pendingOnRenew':'Will use the {p} plan when you renew','toast.renewed':'Renewed','toast.cancelled':'Subscription cancelled',
+  'about.version':'Version','about.latest':'Latest',
+  'tos.1':'FORGE provides general fitness information, not medical advice. If you have a health condition or injury, talk to a doctor before starting a program.',
+  'tos.2':'Calculated values such as BMR and TDEE are estimates only.','tos.3':'Settings are stored in this device’s browser and are not sent to any server.','tos.4':'This app is a prototype; features may change.',
+  'tos.draft':'Draft text for the prototype; have it reviewed by a professional before real use.',
+  'help.q1':'How do I add or remove an exercise?','help.a1':'Go to the Plan tab, type the exercise name, sets and reps, then tap "Add exercise". Tap the ✕ next to an exercise to remove it.',
+  'help.q2':'How is muscle rest counted?','help.a2':'Each muscle group needs 48 hours of rest after training. Tap "Trained" in the Body tab to restart the count.',
+  'help.q3':'Why don’t I get notifications?','help.a3':'Allow notifications for this site in your browser and keep the app open. Try "Test notification" under Notifications.',
+  'help.q4':'Where is my data stored?','help.a4':'Only in this device’s browser. If you switch devices or clear browser data, your settings are lost.',
+  'menu.tracking':'Camera and pose detection','menu.coach':'AI advice settings','menu.privacy':'Privacy and data','menu.appearance':'Theme and display',
+  'goal.label':'Goal','goal.lose':'Lose fat','goal.gain':'Build muscle','goal.maintain':'Stay fit','goal.out':'Daily calories for your goal ({g}): {k} kcal',
+  'trk.camera':'Camera','trk.front':'Front camera','trk.back':'Back camera','trk.test':'Test camera',
+  'trk.grid':'Show alignment grid on the camera view','trk.skeleton':'Show pose skeleton overlay',
+  'trk.note':'The grid applies to the Work tab right away. The chosen camera and skeleton overlay will be used once pose tracking is available.',
+  'trk.ok':'Camera works','trk.denied':'Camera access is blocked. Allow it for this site first.','trk.none':'No camera found on this device','trk.unsupported':'This browser cannot use the camera (needs https or a local file)','trk.fail':'Could not open the camera',
+  'coach.tone':'Coaching style','coach.friendly':'Friendly','coach.strict':'Strict','coach.neutral':'Neutral',
+  'coach.detail':'Advice detail','coach.short':'Short','coach.detailed':'Detailed',
+  'coach.suggest':'Suggest exercises and plans automatically','coach.form':'Warn me about incorrect form','coach.profile':'Use my body profile in advice',
+  'coach.note':'These preferences are saved and will be used once AI chat goes live. The Trainer tab is still a mock-up.',
+  'priv.what':'Data stored on this device','priv.whatBody':"Your name, body profile and goal, units, notifications, language, theme and the demo subscription status are kept only in this device's browser and are not sent anywhere. The app does not record camera images.",
+  'priv.hideName':'Hide my name in the top bar','priv.export':'Download my data (JSON)','priv.clear':'Clear on-device data','priv.clearConfirm':'Tap again to confirm',
+  'priv.note':'Clearing resets body profile, units, notifications, devices, camera, AI Coach and appearance, but keeps your account, language and subscription.',
+  'priv.exported':'Downloaded','priv.cleared':'On-device data cleared',
+  'app.theme':'Theme','app.dark':'Dark','app.light':'Light','app.system':'System','app.accent':'Accent color','app.size':'Text size','app.small':'Small','app.normal':'Normal','app.large':'Large',
+  'ac.orange':'Orange','ac.blue':'Blue','ac.green':'Green','ac.purple':'Purple','ac.pink':'Pink',
+  'pol.1':'The data you enter is stored only in this device’s browser.','pol.2':'The app does not record or upload camera images.','pol.3':'You can download or clear your data any time under Settings → Privacy & Data.','pol.4':'The page loads fonts from Google Fonts, an external service.'
+}};
+function t(k, v){
+  let s = (I18N[S.lang] && I18N[S.lang][k]);
+  if(s === undefined) s = I18N.th[k];
+  if(s === undefined) return k;
+  if(v) for(const n in v) s = s.split('{'+n+'}').join(v[n]);
+  return s;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = id => document.getElementById(id);
+
+/* ---------- units ---------- */
+const unitName = () => S.unit === 'lb' ? t('u.lb') : t('u.kg');
+const toDisp = kg => Math.round((S.unit === 'lb' ? kg * LB_PER_KG : kg) * 10) / 10;
+const fromDisp = v => S.unit === 'lb' ? v / LB_PER_KG : v;
+function cmToFtIn(cm){
+  const tot = Math.round(cm / CM_PER_IN);
+  return {ft: Math.floor(tot / 12), inch: tot % 12};
+}
+function setHeight(prefix, cm){
+  if(S.hUnit === 'cm'){ $(prefix+'-height').value = Math.round(cm); }
+  else { const f = cmToFtIn(cm); $(prefix+'-ft').value = f.ft; $(prefix+'-in').value = f.inch; }
+}
+function getHeightCm(prefix){
+  if(S.hUnit === 'cm') return parseFloat($(prefix+'-height').value);
+  const ft = parseFloat($(prefix+'-ft').value) || 0, inch = parseFloat($(prefix+'-in').value) || 0;
+  return (ft * 12 + inch) * CM_PER_IN;
+}
+function heightRangeText(){
+  if(S.hUnit === 'cm') return `120–230 ${t('u.cm')}`;
+  const a = cmToFtIn(120), b = cmToFtIn(230);
+  return `${a.ft}'${a.inch}" – ${b.ft}'${b.inch}"`;
+}
+
+/* ---------- PLAN tab ---------- */
+const planData = {
+  gym: [
+    {k:'ex.bench', sets:4, reps:8, weight:60},
+    {k:'ex.squat', sets:4, reps:10, weight:80},
+    {k:'ex.pullup', sets:3, reps:8, weight:0},
+    {k:'ex.curl', sets:3, reps:12, weight:12}
+  ],
+  cardio: [
+    {k:'ex.run', sets:1, rk:'r.20min', weight:null},
+    {k:'ex.bike', sets:1, rk:'r.15min', weight:null},
+    {k:'ex.rope', sets:3, rk:'r.2min', weight:null}
+  ],
+  yoga: [
+    {k:'ex.sun', sets:3, rk:'r.rounds', weight:null},
+    {k:'ex.warrior', sets:2, rk:'r.30s', weight:null},
+    {k:'ex.child', sets:1, rk:'r.1min', weight:null}
+  ]
+};
+let currentPlan = 'gym';
+
+function renderPlan(){
+  const wrap = $('plan-body');
+  const list = planData[currentPlan];
+  const unitLabel = currentPlan === 'gym' ? t('plan.u.gym', {w:unitName()}) : t('plan.u.' + currentPlan);
+
+  let rows = list.map((ex, i) => {
+    const name = ex.k ? t(ex.k) : ex.name;
+    const reps = ex.rk ? t(ex.rk) : ex.reps;
+    return `
+    <div class="exercise-row" data-idx="${i}">
+      <div class="exercise-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="exercise-info">
+        <div class="exercise-name">${esc(name)}</div>
+        <div class="exercise-meta">${t('plan.sets', {n:ex.sets})} · ${esc(reps)}${ex.weight ? ' · ' + toDisp(ex.weight) + ' ' + unitName() : ''}</div>
+      </div>
+      <button class="remove-btn" data-remove="${i}" aria-label="${t('plan.remove')}">${ICONS.x}</button>
+    </div>`;
+  }).join('');
+
+  if(!list.length){
+    rows = `<p class="empty-hint">${t('plan.empty')}</p>`;
+  }
+
+  wrap.innerHTML = `
+    <div class="card">
+      <p class="card-title">${t('plan.cardTitle', {type:t('plan.' + currentPlan)})}</p>
+      <p class="card-sub">${unitLabel}</p>
+      ${rows}
+      <div class="add-exercise-form">
+        <div class="name-field">
+          <input type="text" id="new-ex-name" placeholder="${t('plan.namePh')}">
+        </div>
+        <input type="number" id="new-ex-sets" placeholder="${t('plan.setsPh')}" min="1">
+        <input type="text" id="new-ex-reps" placeholder="${t('plan.repsPh')}">
+      </div>
+      <button class="btn btn-ghost btn-sm" id="add-ex-btn" style="margin-top:10px; width:100%;">${t('plan.add')}</button>
+    </div>
+  `;
+
+  wrap.querySelectorAll('[data-remove]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      planData[currentPlan].splice(parseInt(b.getAttribute('data-remove')), 1);
+      renderPlan();
+    });
+  });
+
+  $('add-ex-btn').addEventListener('click', ()=>{
+    const nameEl = $('new-ex-name'), setsEl = $('new-ex-sets'), repsEl = $('new-ex-reps');
+    const name = nameEl.value.trim();
+    if(!name){
+      nameEl.style.borderColor = 'var(--danger)';
+      nameEl.placeholder = t('plan.nameReq');
+      return;
+    }
+    planData[currentPlan].push({
+      name,
+      sets: parseInt(setsEl.value) || 1,
+      reps: repsEl.value.trim() || '-',
+      weight: currentPlan === 'gym' ? (parseFloat(setsEl.dataset.weight)||0) : null
+    });
+    renderPlan();
+  });
+}
+$('plan-segment').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-plan]');
+  if(!btn) return;
+  currentPlan = btn.getAttribute('data-plan');
+  document.querySelectorAll('#plan-segment button').forEach(b=>b.classList.toggle('active', b===btn));
+  renderPlan();
+});
+
+/* ---------- BODY tab: muscle recovery ---------- */
+const REST_HOURS = 48;
+const muscles = [
+  {k:'m.chest', lastTrained: Date.now() - 40*3600*1000},
+  {k:'m.back', lastTrained: Date.now() - 10*3600*1000},
+  {k:'m.legs', lastTrained: Date.now() - 60*3600*1000},
+  {k:'m.shoulders', lastTrained: Date.now() - 5*3600*1000},
+  {k:'m.arms', lastTrained: Date.now() - 30*3600*1000}
+];
+function renderMuscles(){
+  const wrap = $('muscle-list');
+  wrap.innerHTML = muscles.map((m,i)=>{
+    const hoursSince = (Date.now() - m.lastTrained) / 3600000;
+    const pct = Math.max(0, Math.min(100, (hoursSince / REST_HOURS) * 100));
+    const recovered = pct >= 100;
+    const hoursLeft = Math.max(0, REST_HOURS - hoursSince);
+    const color = recovered ? 'var(--recovery)' : 'var(--accent)';
+    const statusText = recovered ? t('m.ready') : t('m.left', {h:hoursLeft.toFixed(0)});
+    return `
+      <div class="muscle-row">
+        <div class="muscle-name">${t(m.k)}</div>
+        <div class="muscle-bar-track"><div class="muscle-bar-fill" style="width:${pct}%; background:${color};"></div></div>
+        <div class="muscle-status" style="color:${recovered?'var(--recovery-text)':'var(--text-secondary)'}">${statusText}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin:6px 0 4px; width:100%;" data-train="${i}">${t('m.train', {m:t(m.k)})}</button>
+    `;
+  }).join('');
+  wrap.querySelectorAll('[data-train]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      muscles[parseInt(b.getAttribute('data-train'))].lastTrained = Date.now();
+      renderMuscles();
+    });
+  });
+}
+setInterval(renderMuscles, 60000);
+
+/* ---------- BODY tab: TDEE calculator ---------- */
+function calcTDEE(){
+  const gender = $('calc-gender').value;
+  const age = parseFloat($('calc-age').value) || 0;
+  const weight = fromDisp(parseFloat($('calc-weight').value) || 0);
+  const height = getHeightCm('calc') || 0;
+  const activity = parseFloat($('calc-activity').value) || 1.2;
+  let bmr = 10*weight + 6.25*height - 5*age + (gender === 'male' ? 5 : -161);
+  bmr = Math.max(0, bmr);
+  const tdee = bmr * activity;
+  $('bmr-out').innerHTML = `${Math.round(bmr).toLocaleString()} <small>kcal</small>`;
+  $('tdee-out').innerHTML = `${Math.round(tdee).toLocaleString()} <small>kcal</small>`;
+  const gf = {lose:0.85, gain:1.10, maintain:1}[S.goal] || 1;
+  $('goal-out').textContent = t('goal.out', {g:t('goal.' + S.goal), k:Math.round(tdee * gf).toLocaleString()});
+}
+['calc-gender','calc-age','calc-weight','calc-height','calc-ft','calc-in','calc-activity'].forEach(id=>{
+  $(id).addEventListener('input', calcTDEE);
+  $(id).addEventListener('change', calcTDEE);
+});
+
+/* ---------- WORK tab ---------- */
+const workBtn = $('work-start-btn');
+let workRunning = false;
+function workLabel(){
+  workBtn.textContent = workRunning ? t('work.stop') : t('work.start');
+  workBtn.classList.toggle('btn-accent', !workRunning);
+}
+workBtn.addEventListener('click', ()=>{ workRunning = !workRunning; workLabel(); });
+
+/* rest timer */
+let restEnd = 0, restTick = null;
+const fmtClock = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+function restRefresh(){
+  $('rest-sub').textContent = t('rest.sub', {d:fmtClock(S.restSec)});
+  if(!restEnd) $('rest-display').textContent = fmtClock(S.restSec);
+}
+function restUpdate(){
+  const left = Math.ceil((restEnd - Date.now()) / 1000);
+  if(left <= 0){
+    clearInterval(restTick); restEnd = 0;
+    $('rest-display').textContent = t('rest.done');
+    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
+    if(S.restOn) notify(t('n.restTitle'), t('n.restBody')); else toast(t('rest.done'));
+    return;
+  }
+  $('rest-display').textContent = fmtClock(left);
+}
+$('rest-start').addEventListener('click', ()=>{
+  restEnd = Date.now() + S.restSec * 1000;
+  clearInterval(restTick);
+  restTick = setInterval(restUpdate, 250);
+  restUpdate();
+});
+$('rest-reset').addEventListener('click', ()=>{ clearInterval(restTick); restEnd = 0; restRefresh(); });
+
+/* ---------- TRAINER / AI CHAT toggle ---------- */
+function renderChat(){
+  const kind = document.querySelector('#chat-toggle .chip.active').getAttribute('data-chat');
+  const keys = kind === 'trainer'
+    ? [['them','chat.t1'],['me','chat.t2'],['them','chat.t3']]
+    : [['them','chat.a1'],['me','chat.a2'],['them','chat.a3']];
+  $('chat-thread').innerHTML = keys.map(([c,k]) => `<div class="chat-bubble ${c}">${esc(t(k))}</div>`).join('');
+}
+$('chat-toggle').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('#chat-toggle .chip').forEach(c=>c.classList.toggle('active', c===chip));
+  renderChat();
+});
+
+/* ---------- SETTINGS: shared helpers ---------- */
+let toastTimer;
+function toast(msg){
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+function msg(id, text, isErr){
+  const m = $(id);
+  m.textContent = text;
+  m.classList.toggle('err', !!isErr);
+}
+function updateHello(){ $('hello').textContent = (S.authMethod && !S.hideName) ? S.name : ''; }
+
+/* ---------- SETTINGS: navigation (menu list -> sub page) ---------- */
+const SET_PAGES = {account:'Account', body:'Body Profile', unit:'Units', notif:'Notifications', tracking:'Body Tracking', coach:'AI Coach', devices:'Connected Devices', lang:'Language', privacy:'Privacy & Data', appearance:'Appearance', sub:'Subscription', about:'About & Help'};
+let currentSetPage = null;
+function showSetPage(name){
+  currentSetPage = name || null;
+  $('set-home').hidden = !!name;
+  $('set-page').hidden = !name;
+  document.querySelectorAll('.set-sub').forEach(el => el.hidden = el.getAttribute('data-page') !== name);
+  if(name){
+    $('set-page-title').textContent = SET_PAGES[name];
+    $('set-page-sub').textContent = t('menu.' + name);
+    disarmAll();
+    if(name === 'account') renderAccount();
+    if(name === 'sub') renderSub();
+    if(name === 'devices') renderDevices();
+  }
+}
+document.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', ()=>showSetPage(b.getAttribute('data-open'))));
+$('set-back').addEventListener('click', ()=>showSetPage(null));
+
+/* ---------- SETTINGS: account ---------- */
+let logoutArmed = false, logoutTimer;
+function disarmAll(){
+  logoutArmed = false; clearTimeout(logoutTimer);
+  cancelArmed = false; clearTimeout(cancelTimer);
+  $('acc-del-panel').hidden = true;
+  privArmed = false; clearTimeout(privTimer);
+  $('clear-data').textContent = t('priv.clear');
+  if($('acc-logout')) $('acc-logout').textContent = t('acc.logout');
+}
+function renderAccount(){
+  const signed = !!S.authMethod;
+  $('acc-signed').hidden = !signed;
+  $('acc-out').hidden = signed;
+  if(signed){
+    const g = S.authMethod === 'google';
+    $('acc-name').value = S.name;
+    $('acc-avatar').innerHTML = g ? ICONS.google : ICONS.mail;
+    $('acc-avatar').classList.toggle('google', g);
+    $('acc-via-label').textContent = g ? 'Google account' : S.email;
+    $('acc-via-detail').textContent = g ? t('acc.viaGoogle') : t('acc.viaEmail');
+    $('acc-logout').textContent = logoutArmed ? t('acc.logoutConfirm') : t('acc.logout');
+  }else{
+    $('auth-email-form').hidden = true;
+    $('auth-email-toggle').setAttribute('aria-expanded', 'false');
+    msg('auth-msg', '', true);
+  }
+}
+function signIn(method, email){
+  S.authMethod = method;
+  S.email = method === 'email' ? email : '';
+  saveSettings(); updateHello(); renderAccount();
+  toast(t('toast.loggedIn'));
+}
+$('auth-google').addEventListener('click', ()=>signIn('google'));
+$('auth-email-toggle').addEventListener('click', ()=>{
+  const f = $('auth-email-form');
+  f.hidden = !f.hidden;
+  $('auth-email-toggle').setAttribute('aria-expanded', String(!f.hidden));
+  if(!f.hidden) $('auth-email').focus();
+});
+function submitEmail(){
+  const v = $('auth-email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return msg('auth-msg', t('acc.emailErr'), true);
+  $('auth-email').value = '';
+  signIn('email', v);
+}
+$('auth-email-go').addEventListener('click', submitEmail);
+$('auth-email').addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); submitEmail(); } });
+$('auth-email').addEventListener('input', ()=>msg('auth-msg', '', true));
+$('acc-save').addEventListener('click', ()=>{
+  S.name = $('acc-name').value.trim().slice(0, 20);
+  saveSettings(); updateHello();
+  msg('acc-msg', t('acc.saved'), false);
+});
+$('acc-name').addEventListener('input', ()=>msg('acc-msg', '', false));
+$('acc-logout').addEventListener('click', ()=>{
+  if(!logoutArmed){
+    logoutArmed = true; renderAccount();
+    logoutTimer = setTimeout(()=>{ logoutArmed = false; renderAccount(); }, 4000);
+    return;
+  }
+  logoutArmed = false; clearTimeout(logoutTimer);
+  S.authMethod = null; S.email = '';
+  saveSettings(); updateHello(); renderAccount();
+  toast(t('toast.loggedOut'));
+});
+$('acc-delete').addEventListener('click', ()=>{ $('acc-del-panel').hidden = false; });
+$('acc-del-no').addEventListener('click', ()=>{ $('acc-del-panel').hidden = true; });
+$('acc-del-yes').addEventListener('click', ()=>{
+  const keepLang = S.lang;
+  try{ localStorage.removeItem(SETTINGS_KEY); }catch(e){}
+  S = freshDefaults(); S.lang = keepLang;
+  disarmAll(); showSetPage(null);
+  refreshAll();
+  toast(t('toast.deleted'));
+});
+
+/* ---------- SETTINGS: body info ---------- */
+function fillBody(){
+  $('set-gender').value = S.gender;
+  $('set-goal').value = S.goal;
+  $('set-age').value = S.age;
+  $('set-weight').value = toDisp(S.weightKg);
+  setHeight('set', S.heightCm);
+}
+function applyProfileToCalc(){
+  $('calc-gender').value = S.gender;
+  $('calc-age').value = S.age;
+  $('calc-weight').value = toDisp(S.weightKg);
+  setHeight('calc', S.heightCm);
+  calcTDEE();
+}
+$('save-profile').addEventListener('click', ()=>{
+  const age = parseFloat($('set-age').value);
+  const wDisp = parseFloat($('set-weight').value);
+  const hCm = getHeightCm('set');
+  if(!(age >= 10 && age <= 90)) return msg('profile-msg', t('body.err.age'), true);
+  if(!(wDisp >= toDisp(30) && wDisp <= toDisp(200))) return msg('profile-msg', t('body.err.weight', {a:toDisp(30), b:toDisp(200), u:unitName()}), true);
+  if(!(hCm >= 119.5 && hCm <= 230.5)) return msg('profile-msg', t('body.err.height', {r:heightRangeText()}), true);
+  S.gender = $('set-gender').value;
+  S.goal = $('set-goal').value;
+  S.age = Math.round(age);
+  S.weightKg = fromDisp(wDisp);
+  S.heightCm = Math.round(hCm);
+  saveSettings();
+  applyProfileToCalc();
+  msg('profile-msg', t('body.saved'), false);
+});
+['set-gender','set-goal','set-age','set-weight','set-height','set-ft','set-in'].forEach(id => $(id).addEventListener('input', ()=>msg('profile-msg','',false)));
+
+/* ---------- SETTINGS: units ---------- */
+function applyUnitToUI(){
+  const wl = t('f.weight', {u:unitName()});
+  $('calc-weight-label').textContent = wl;
+  $('set-weight-label').textContent = wl;
+  const hl = S.hUnit === 'cm' ? t('f.height', {u:t('u.cm')}) : t('f.heightFtIn');
+  $('calc-height-label').textContent = hl;
+  $('set-height-label').textContent = hl;
+  [$('calc-weight'), $('set-weight')].forEach(el=>{ el.min = toDisp(30); el.max = toDisp(200); });
+  ['calc','set'].forEach(p=>{
+    $(p+'-height').hidden = S.hUnit !== 'cm';
+    $(p+'-ftin').hidden = S.hUnit === 'cm';
+  });
+  document.querySelectorAll('#unit-w button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-unit') === S.unit));
+  document.querySelectorAll('#unit-h button').forEach(b=>b.classList.toggle('active', b.getAttribute('data-hunit') === S.hUnit));
+}
+$('unit-w').addEventListener('click', (e)=>{
+  const b = e.target.closest('button[data-unit]');
+  if(!b || b.getAttribute('data-unit') === S.unit) return;
+  let calcKg = fromDisp(parseFloat($('calc-weight').value));
+  if(!(calcKg > 0)) calcKg = S.weightKg;
+  S.unit = b.getAttribute('data-unit');
+  saveSettings(); applyUnitToUI();
+  $('set-weight').value = toDisp(S.weightKg);
+  $('calc-weight').value = toDisp(calcKg);
+  calcTDEE(); renderPlan();
+});
+$('unit-h').addEventListener('click', (e)=>{
+  const b = e.target.closest('button[data-hunit]');
+  if(!b || b.getAttribute('data-hunit') === S.hUnit) return;
+  let calcCm = getHeightCm('calc');
+  if(!(calcCm > 0)) calcCm = S.heightCm;
+  S.hUnit = b.getAttribute('data-hunit');
+  saveSettings(); applyUnitToUI();
+  setHeight('set', S.heightCm);
+  setHeight('calc', calcCm);
+  calcTDEE();
+});
+
+/* ---------- SETTINGS: notifications ---------- */
+function refreshSwitches(){
+  $('sw-remind').setAttribute('aria-checked', S.remindOn);
+  $('sw-rest').setAttribute('aria-checked', S.restOn);
+  $('sw-recover').setAttribute('aria-checked', S.recoverOn);
+  $('set-remind-time').value = S.remindTime;
+  $('set-rest').value = String(S.restSec);
+  syncControls();
+}
+function requestNotifPermission(){
+  if(!('Notification' in window)) return Promise.resolve('unsupported');
+  if(Notification.permission === 'granted' || Notification.permission === 'denied') return Promise.resolve(Notification.permission);
+  try{
+    return Promise.resolve(Notification.requestPermission()).then(p => p || Notification.permission);
+  }catch(e){ return Promise.resolve('unsupported'); }
+}
+function notify(title, body){
+  try{
+    if('Notification' in window && Notification.permission === 'granted'){
+      new Notification(title, {body});
+      return;
+    }
+  }catch(e){}
+  toast(title + ' — ' + body);
+}
+async function setNotifToggle(key, on){
+  if(on){
+    const perm = await requestNotifPermission();
+    if(perm !== 'granted'){
+      S[key] = false; refreshSwitches();
+      $('notif-hint').textContent = perm === 'unsupported' ? t('n.unsupported') : t('n.denied');
+      return;
+    }
+    $('notif-hint').textContent = t('n.hint');
+  }
+  S[key] = on;
+  saveSettings(); refreshSwitches();
+  if(key === 'recoverOn' && on) markRecovered();
+}
+$('sw-remind').addEventListener('click', ()=>setNotifToggle('remindOn', !S.remindOn));
+$('sw-rest').addEventListener('click', ()=>setNotifToggle('restOn', !S.restOn));
+$('sw-recover').addEventListener('click', ()=>setNotifToggle('recoverOn', !S.recoverOn));
+$('set-remind-time').addEventListener('change', (e)=>{
+  if(!e.target.value){ e.target.value = S.remindTime; return; }
+  S.remindTime = e.target.value; S.lastRemindDate = '';
+  saveSettings();
+});
+$('set-rest').addEventListener('change', (e)=>{
+  S.restSec = parseInt(e.target.value) || 90;
+  saveSettings(); restRefresh();
+});
+$('test-notif').addEventListener('click', async ()=>{
+  const perm = await requestNotifPermission();
+  if(perm === 'granted') notify('FORGE', t('n.ok'));
+  else toast(perm === 'unsupported' ? t('n.unsupported') : t('n.denied'));
+});
+
+const recoverSeen = new Set();
+const muscleKey = m => m.k + '|' + m.lastTrained;
+function markRecovered(){
+  muscles.forEach(m=>{
+    if((Date.now() - m.lastTrained) / 3600000 >= REST_HOURS) recoverSeen.add(muscleKey(m));
+  });
+}
+function checkNotifications(){
+  if(S.recoverOn){
+    muscles.forEach(m=>{
+      const key = muscleKey(m);
+      if((Date.now() - m.lastTrained) / 3600000 >= REST_HOURS && !recoverSeen.has(key)){
+        recoverSeen.add(key);
+        notify(t('n.recTitle'), t('n.recBody', {m:t(m.k), h:REST_HOURS}));
+      }
+    });
+  }
+  if(S.remindOn && S.remindTime){
+    const now = new Date();
+    const [hh, mm] = S.remindTime.split(':').map(Number);
+    const diff = now.getHours() * 60 + now.getMinutes() - (hh * 60 + mm);
+    const today = now.toDateString();
+    if(diff >= 0 && diff < 15 && S.lastRemindDate !== today){
+      S.lastRemindDate = today; saveSettings();
+      notify(t('n.workoutTitle'), t('n.workoutBody'));
+    }
+  }
+}
+markRecovered();
+setInterval(checkNotifications, 30000);
+
+/* ---------- SETTINGS: connected devices (Web Bluetooth, heart-rate service) ---------- */
+let btDevice = null;
+function renderDevices(){
+  const list = $('dev-list');
+  const name = btDevice ? (btDevice.name || t('dev.generic')) : S.lastDevice;
+  if(!name){
+    list.innerHTML = `<p class="empty-hint" style="padding:6px 0 14px;">${t('dev.empty')}</p>`;
+  }else{
+    const on = !!(btDevice && btDevice.gatt && btDevice.gatt.connected);
+    list.innerHTML = `
+      <div class="settings-list" style="margin-bottom:12px;">
+        <div class="settings-item">
+          <i class="ic" data-ic="watch"></i>
+          <div class="row-text"><b>${esc(name)}</b><small style="color:${on ? 'var(--recovery-text)' : 'var(--text-secondary)'}">${on ? t('dev.connected') : t('dev.disconnected')}</small></div>
+          <button class="btn btn-ghost btn-sm" id="dev-toggle">${on ? t('dev.disconnect') : t('dev.connect')}</button>
+        </div>
+      </div>`;
+    paintIcons(list);
+  }
+  $('dev-add').hidden = !!name;
+}
+async function pairDevice(){
+  if(!navigator.bluetooth){ msg('dev-msg', t('dev.unsupported'), true); return; }
+  try{
+    const dev = await navigator.bluetooth.requestDevice({filters:[{services:['heart_rate']}]});
+    dev.addEventListener('gattserverdisconnected', renderDevices);
+    btDevice = dev;
+    S.lastDevice = dev.name || t('dev.generic');
+    saveSettings();
+    msg('dev-msg', '', false);
+    await dev.gatt.connect();
+  }catch(e){
+    msg('dev-msg', (e && e.name === 'NotFoundError') ? t('dev.cancelled') : t('dev.failed'), true);
+  }
+  renderDevices();
+}
+$('dev-add').addEventListener('click', pairDevice);
+$('dev-list').addEventListener('click', async (e)=>{
+  if(!e.target.closest('#dev-toggle')) return;
+  if(btDevice && btDevice.gatt && btDevice.gatt.connected){
+    btDevice.gatt.disconnect();
+  }else if(btDevice){
+    try{ await btDevice.gatt.connect(); msg('dev-msg','',false); }catch(err){ msg('dev-msg', t('dev.failed'), true); }
+  }else{
+    await pairDevice(); return;
+  }
+  renderDevices();
+});
+
+/* ---------- SETTINGS: language ---------- */
+function renderLangList(){
+  document.querySelectorAll('#lang-list .opt-row').forEach(b=>b.setAttribute('aria-checked', b.getAttribute('data-lang') === S.lang));
+  $('menu-lang-sub').textContent = t('menu.lang') + ' · ' + (S.lang === 'th' ? 'ไทย' : 'English');
+}
+$('lang-list').addEventListener('click', (e)=>{
+  const b = e.target.closest('.opt-row');
+  if(!b) return;
+  S.lang = b.getAttribute('data-lang');
+  saveSettings();
+  refreshText();
+});
+
+/* ---------- SETTINGS: subscription (demo; no real billing) ---------- */
+let subPick = 'monthly', cancelArmed = false, cancelTimer;
+function addPeriod(date, plan){
+  const d = new Date(date);
+  if(plan === 'yearly') d.setFullYear(d.getFullYear() + 1); else d.setMonth(d.getMonth() + 1);
+  return d;
+}
+/* an active (not cancelled) subscription renews itself; a scheduled plan change kicks in at that renewal */
+function settleSub(){
+  const s = S.sub;
+  if(!s.plan || !s.expires || s.cancelled) return;
+  let changed = false, guard = 0;
+  while(new Date(s.expires) <= new Date() && guard++ < 600){
+    if(s.pending){ s.plan = s.pending; s.pending = null; }
+    s.expires = addPeriod(new Date(s.expires), s.plan).toISOString();
+    changed = true;
+  }
+  if(changed) saveSettings();
+}
+function subState(){
+  settleSub();
+  const s = S.sub;
+  if(!s.plan || !s.expires) return 'none';
+  if(new Date(s.expires) <= new Date()) return 'expired';
+  return s.cancelled ? 'cancelled' : 'active';
+}
+const fmtDate = iso => new Date(iso).toLocaleDateString(S.lang === 'th' ? 'th-TH' : 'en-GB', {day:'numeric', month:'long', year:'numeric'});
+function renderSub(){
+  const st = subState();
+  const s = S.sub;
+  const live = (st === 'active' || st === 'cancelled');
+  let h = `<div class="about-row"><span>${t('sub.status')}</span><b>${t('sub.' + st)}</b></div>`;
+  if(st !== 'none'){
+    h += `<div class="about-row"><span>${t('sub.plan')}</span><b>${t('sub.' + s.plan)}</b></div>`;
+    if(live && s.pending) h += `<div class="about-row"><span>${t('sub.next')}</span><b>${t('sub.' + s.pending)}</b></div>`;
+    h += `<div class="about-row"><span>${t('sub.expiry')}</span><b>${fmtDate(s.expires)}</b></div>`;
+  }
+  if(!live){
+    h += `<p class="card-title" style="margin-top:16px;">${t('sub.choose')}</p>
+      <div class="segment" style="margin:10px 0 14px;">
+        <button data-act="pick-monthly" class="${subPick === 'monthly' ? 'active' : ''}">${t('sub.monthly')}</button>
+        <button data-act="pick-yearly" class="${subPick === 'yearly' ? 'active' : ''}">${t('sub.yearly')}</button>
+      </div>
+      <button class="btn btn-accent" data-act="subscribe">${t('sub.subscribe')}</button>`;
+  }else{
+    const target = s.pending || s.plan;
+    const note = !s.pending ? t('sub.changeNote')
+      : (st === 'active' ? t('sub.pendingInfo', {p:t('sub.' + s.pending), d:fmtDate(s.expires)}) : t('sub.pendingOnRenew', {p:t('sub.' + s.pending)}));
+    h += `<p class="card-title" style="margin-top:16px;">${t('sub.change')}</p>
+      <div class="segment" style="margin:10px 0 8px;">
+        <button data-act="switch-monthly" class="${target === 'monthly' ? 'active' : ''}">${t('sub.monthly')}</button>
+        <button data-act="switch-yearly" class="${target === 'yearly' ? 'active' : ''}">${t('sub.yearly')}</button>
+      </div>
+      <p class="card-sub" style="margin:0 0 14px;">${note}</p>
+      <button class="btn btn-accent" data-act="renew">${t('sub.renew')}</button>`;
+    if(st === 'active') h += `<button class="btn btn-ghost btn-danger" data-act="cancel" style="margin-top:10px;">${cancelArmed ? t('sub.cancelConfirm') : t('sub.cancel')}</button>`;
+  }
+  $('sub-card').innerHTML = h;
+}
+$('sub-card').addEventListener('click', (e)=>{
+  const b = e.target.closest('[data-act]');
+  if(!b) return;
+  const act = b.getAttribute('data-act');
+  if(act === 'pick-monthly' || act === 'pick-yearly'){ subPick = act.slice(5); renderSub(); return; }
+  if(act === 'switch-monthly' || act === 'switch-yearly'){
+    const target = act.slice(7);
+    S.sub.pending = (target === S.sub.plan) ? null : target;
+    saveSettings(); renderSub();
+    toast(S.sub.pending ? t('toast.planSet') : t('toast.planKeep'));
+    return;
+  }
+  if(act === 'subscribe'){
+    S.sub = {plan:subPick, expires:addPeriod(new Date(), subPick).toISOString(), cancelled:false, pending:null};
+    saveSettings(); renderSub(); toast(t('toast.subscribed')); return;
+  }
+  if(act === 'renew'){
+    const base = new Date(Math.max(Date.now(), new Date(S.sub.expires).getTime()));
+    if(S.sub.pending){ S.sub.plan = S.sub.pending; S.sub.pending = null; }
+    S.sub.expires = addPeriod(base, S.sub.plan).toISOString();
+    S.sub.cancelled = false;
+    saveSettings(); renderSub(); toast(t('toast.renewed')); return;
+  }
+  if(act === 'cancel'){
+    if(!cancelArmed){
+      cancelArmed = true; renderSub();
+      cancelTimer = setTimeout(()=>{ cancelArmed = false; renderSub(); }, 4000);
+      return;
+    }
+    cancelArmed = false; clearTimeout(cancelTimer);
+    S.sub.cancelled = true;
+    saveSettings(); renderSub(); toast(t('toast.cancelled'));
+  }
+});
+
+/* ---------- SETTINGS: generic switches & segments ---------- */
+const FLAG_SWITCHES = {'sw-grid':'gridOn','sw-skel':'skelOn','sw-suggest':'coachSuggest','sw-form':'coachForm','sw-cprofile':'coachProfile','sw-hide':'hideName'};
+const SEGMENTS = [
+  ['cam-seg','data-cam','camFacing'], ['coach-tone','data-tone','coachTone'], ['coach-detail','data-detail','coachDetail'],
+  ['theme-seg','data-theme-opt','theme'], ['size-seg','data-size','textSize'], ['accent-list','data-accent','accent']
+];
+function syncControls(){
+  Object.keys(FLAG_SWITCHES).forEach(id => $(id).setAttribute('aria-checked', !!S[FLAG_SWITCHES[id]]));
+  SEGMENTS.forEach(([id, attr, key])=>{
+    $(id).querySelectorAll('[' + attr + ']').forEach(b=>{
+      const on = b.getAttribute(attr) === S[key];
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-checked', on);
+    });
+  });
+}
+function applyGrid(){
+  const g = document.querySelector('.work-camera .grid-overlay');
+  if(g) g.hidden = !S.gridOn;
+}
+Object.keys(FLAG_SWITCHES).forEach(id=>{
+  $(id).addEventListener('click', ()=>{
+    const k = FLAG_SWITCHES[id];
+    S[k] = !S[k]; saveSettings(); syncControls();
+    if(k === 'gridOn') applyGrid();
+    if(k === 'hideName') updateHello();
+  });
+});
+SEGMENTS.forEach(([id, attr, key])=>{
+  $(id).addEventListener('click', (e)=>{
+    const b = e.target.closest('[' + attr + ']');
+    if(!b) return;
+    S[key] = b.getAttribute(attr);
+    saveSettings(); syncControls();
+    if(key === 'theme' || key === 'accent' || key === 'textSize') applyAppearance();
+  });
+});
+
+/* ---------- SETTINGS: appearance ---------- */
+const ACCENTS = {orange:'#FF5A1F', blue:'#3B82F6', green:'#22C55E', purple:'#8B5CF6', pink:'#EC4899'};
+const darkMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+const resolvedTheme = () => S.theme === 'system' ? ((darkMQ && !darkMQ.matches) ? 'light' : 'dark') : S.theme;
+function hexRGB(h){ const n = parseInt(h.slice(1), 16); return [(n>>16)&255, (n>>8)&255, n&255]; }
+function mixHex(a, b, amt){
+  const x = hexRGB(a), y = hexRGB(b);
+  return 'rgb(' + x.map((v,i)=>Math.round(v + (y[i]-v)*amt)).join(',') + ')';
+}
+function applyAppearance(){
+  const th = resolvedTheme(), root = document.documentElement;
+  root.setAttribute('data-theme', th);
+  const ac = ACCENTS[S.accent] || ACCENTS.orange;
+  root.style.setProperty('--accent', ac);
+  root.style.setProperty('--accent-bg', 'rgba(' + hexRGB(ac).join(',') + ',0.14)');
+  root.style.setProperty('--accent-text', th === 'dark' ? mixHex(ac, '#ffffff', 0.75) : mixHex(ac, '#000000', 0.45));
+  root.style.zoom = ({small:'0.92', normal:'', large:'1.1'})[S.textSize] || '';
+}
+if(darkMQ && darkMQ.addEventListener) darkMQ.addEventListener('change', ()=>{ if(S.theme === 'system') applyAppearance(); });
+
+/* ---------- SETTINGS: body tracking (camera test) ---------- */
+$('cam-test').addEventListener('click', async ()=>{
+  if(!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) return msg('cam-msg', t('trk.unsupported'), true);
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:S.camFacing}});
+    stream.getTracks().forEach(tr => tr.stop());
+    msg('cam-msg', t('trk.ok'), false);
+  }catch(e){
+    const n = e && e.name;
+    msg('cam-msg', (n === 'NotAllowedError' || n === 'SecurityError') ? t('trk.denied')
+      : (n === 'NotFoundError' || n === 'OverconstrainedError') ? t('trk.none') : t('trk.fail'), true);
+  }
+});
+
+/* ---------- SETTINGS: privacy & data ---------- */
+let privArmed = false, privTimer;
+$('export-data').addEventListener('click', ()=>{
+  const data = {app:'FORGE', version:APP_VERSION, exportedAt:new Date().toISOString(), settings:S, plan:planData};
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:'application/json'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'forge-data.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  msg('priv-msg', t('priv.exported'), false);
+});
+$('clear-data').addEventListener('click', ()=>{
+  if(!privArmed){
+    privArmed = true;
+    $('clear-data').textContent = t('priv.clearConfirm');
+    privTimer = setTimeout(()=>{ privArmed = false; $('clear-data').textContent = t('priv.clear'); }, 4000);
+    return;
+  }
+  privArmed = false; clearTimeout(privTimer);
+  const keep = {lang:S.lang, authMethod:S.authMethod, email:S.email, name:S.name, sub:S.sub};
+  S = Object.assign(freshDefaults(), keep);
+  btDevice = null;
+  saveSettings();
+  refreshAll();
+  $('clear-data').textContent = t('priv.clear');
+  msg('priv-msg', t('priv.cleared'), false);
+});
+
+/* ---------- apply language + refresh everything ---------- */
+function applyStaticText(){
+  document.documentElement.lang = S.lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))));
+}
+function refreshText(){
+  applyStaticText();
+  applyUnitToUI();
+  applyAppearance();
+  applyGrid();
+  syncControls();
+  calcTDEE();
+  updateHello();
+  renderPlan();
+  renderMuscles();
+  renderChat();
+  workLabel();
+  restRefresh();
+  renderLangList();
+  $('notif-hint').textContent = t('n.hint');
+  $('about-version').textContent = 'v' + APP_VERSION;
+  if(currentSetPage){
+    $('set-page-sub').textContent = t('menu.' + currentSetPage);
+    if(currentSetPage === 'account') renderAccount();
+    if(currentSetPage === 'sub') renderSub();
+    if(currentSetPage === 'devices') renderDevices();
+  }
+}
+function refreshAll(){
+  applyUnitToUI();
+  fillBody();
+  applyProfileToCalc();
+  refreshSwitches();
+  refreshText();
+}
+refreshAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#14130F" />
+<title>FORGE — Plan Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+:root{--bg:#14130F;--surface:#1E1C17;--surface2:#26241D;--border:rgba(245,243,238,.10);--border2:rgba(245,243,238,.18);--text:#F5F3EE;--muted:#A7A296;--quiet:#777265;--accent:#FF5A1F;--accent-soft:rgba(255,90,31,.14);--mint:#55C7B5;--mint-soft:rgba(85,199,181,.12);--danger:#E4574B;--head:'Barlow Condensed',Impact,sans-serif;--body:'Inter',Arial,sans-serif;--radius:18px;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.app{min-height:100vh;display:flex;flex-direction:column}.topbar{height:76px;padding:0 clamp(18px,5vw,72px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(20,19,15,.92);position:sticky;top:0;z-index:20;backdrop-filter:blur(14px)}.brand{font:800 30px var(--head);letter-spacing:.8px}.brand span{color:var(--accent)}.topnav{display:flex;gap:8px;align-items:center}.nav-link{background:none;border:0;color:var(--muted);padding:11px 16px;border-radius:12px;font-size:13px}.nav-link.active{color:var(--text);background:var(--surface2)}.user-area{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-weight:700}
+main{width:min(1320px,100%);margin:0 auto;padding:38px clamp(18px,4.6vw,64px) 112px;flex:1}.screen{display:none}.screen.active{display:block}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:2px;font:600 13px var(--head)}h1,h2,h3,p{margin-top:0}.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:30px}.page-title{font:600 clamp(40px,5vw,58px)/.98 var(--head);letter-spacing:.4px;margin:7px 0 10px}.page-sub{color:var(--muted);font-size:14px;line-height:1.7;max-width:620px;margin:0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:28px 0 15px}.section-title{font:600 27px var(--head);letter-spacing:.2px;margin:0}.section-note{color:var(--quiet);font-size:11px;margin:4px 0 0}.text-link{border:0;background:none;color:var(--accent);font-size:12px;padding:8px 0}
+.btn{border:1px solid var(--border2);border-radius:12px;min-height:44px;padding:0 17px;background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:.18s}.btn:hover{transform:translateY(-1px);border-color:rgba(255,90,31,.55)}.btn.primary{background:var(--accent);color:#1B0A03;border-color:var(--accent)}.btn.ghost{background:transparent}.btn.small{min-height:36px;padding:0 12px;font-size:12px}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.carousel-wrap{position:relative;padding:6px 0 10px}.carousel-viewport{overflow:hidden;padding:12px 0 24px}.carousel-track{display:flex;align-items:center;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:12px max(20px,calc((100% - 360px)/2));}.carousel-track::-webkit-scrollbar{display:none}.template-card{position:relative;flex:0 0 clamp(280px,31vw,365px);height:300px;overflow:hidden;border:1px solid var(--border2);border-radius:22px;scroll-snap-align:center;isolation:isolate;background:#29271f;transition:transform .25s,border-color .25s,opacity .25s;opacity:.66;transform:scale(.91);cursor:pointer;text-align:left;padding:0;color:var(--text)}.template-card.active{opacity:1;transform:scale(1.035);border-color:rgba(255,90,31,.75);box-shadow:0 22px 55px rgba(0,0,0,.32)}.template-card:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.template-card .photo{position:absolute;inset:0;background-size:cover;background-position:center;z-index:-2;transform:scale(1.01);transition:transform .45s}.template-card:hover .photo{transform:scale(1.06)}.template-card:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.08) 8%,rgba(0,0,0,.2) 36%,rgba(0,0,0,.88) 100%)}.card-topline{position:absolute;top:17px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center}.tag{padding:7px 10px;border-radius:30px;background:rgba(15,14,11,.72);border:1px solid rgba(255,255,255,.18);font-size:10px;letter-spacing:.4px;color:#fff;backdrop-filter:blur(8px)}.tag.accent{background:var(--accent);color:#210d04;border-color:transparent;font-weight:700}.template-copy{position:absolute;left:21px;right:21px;bottom:20px}.template-kicker{font-size:10px;color:#FFD2BF;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}.template-name{font:600 35px/.98 var(--head);margin:0 0 8px;color:white}.template-desc{font-size:11px;line-height:1.5;color:rgba(255,255,255,.78);margin:0 0 14px;max-width:270px}.template-meta{display:flex;gap:13px;align-items:center;color:rgba(255,255,255,.88);font-size:10px}.template-meta span{display:flex;align-items:center;gap:5px}.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;background:rgba(30,28,23,.94);border:1px solid var(--border2);color:var(--text);font-size:20px;display:grid;place-items:center}.carousel-arrow:hover{border-color:var(--accent);color:var(--accent)}.carousel-arrow.prev{left:4px}.carousel-arrow.next{right:4px}.carousel-dots{display:flex;justify-content:center;gap:7px;margin-top:-3px}.dot{width:6px;height:6px;border-radius:10px;background:#5E594E;border:0;padding:0}.dot.active{width:22px;background:var(--accent)}
+.below-carousel{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:18px;margin-top:26px}.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.panel-heading{font:600 25px var(--head);margin:0 0 5px}.panel-sub{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 17px}.type-list{display:flex;gap:9px;flex-wrap:wrap}.type-chip{border:1px solid var(--border2);background:var(--surface2);color:var(--muted);padding:10px 15px;border-radius:10px;font-size:12px}.type-chip.active{border-color:var(--accent);color:#FFD0BC;background:var(--accent-soft)}.create-panel{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(120deg,rgba(255,90,31,.13),rgba(255,90,31,.025)),var(--surface)}.create-copy{min-width:0}.create-copy .panel-heading{margin-bottom:5px}.create-icon{width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:25px;flex:none}.create-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+/* details */
+.back{display:inline-flex;gap:8px;align-items:center;background:none;border:0;color:var(--muted);font-size:12px;padding:0;margin-bottom:22px}.back:hover{color:var(--text)}.detail-hero{min-height:270px;border-radius:22px;overflow:hidden;position:relative;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:30px;margin-bottom:24px;border:1px solid var(--border2)}.detail-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.84),rgba(0,0,0,.28)),linear-gradient(0deg,rgba(0,0,0,.55),transparent)}.detail-hero-content{position:relative;max-width:620px}.detail-hero h2{font:600 clamp(36px,5vw,52px)/.95 var(--head);margin:8px 0}.detail-hero p{color:rgba(255,255,255,.78);font-size:13px;line-height:1.6;margin:0}.detail-stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;color:#eee;font-size:11px}.detail-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.8fr);gap:18px;align-items:start}.focus-panel,.info-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.focus-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:17px}.focus-option{min-height:86px;border:1px solid var(--border2);border-radius:13px;background:var(--surface2);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;transition:.16s}.focus-option .muscle-icon{font-size:23px;color:#A7A296}.focus-option.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}.focus-option.selected .muscle-icon{color:var(--accent)}.selection-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:20px;padding-top:17px;border-top:1px solid var(--border)}.selection-count{font-size:11px;color:var(--muted)}.info-row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);font-size:12px}.info-row:last-child{border:0}.info-row span:first-child{color:var(--muted)}.info-row strong{font-weight:600;text-align:right}.note{font-size:11px;line-height:1.6;color:var(--quiet);margin:13px 0 0}
+/* AI preview */
+.ai-banner{display:flex;align-items:center;gap:14px;padding:17px 19px;background:var(--mint-soft);border:1px solid rgba(85,199,181,.25);border-radius:15px;margin:17px 0 20px}.ai-mark{width:38px;height:38px;border-radius:12px;background:rgba(85,199,181,.15);display:grid;place-items:center;color:var(--mint);font-size:20px;flex:none}.ai-banner strong{display:block;font-size:13px;margin-bottom:4px}.ai-banner p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}.ai-layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.65fr);gap:18px}.exercise-list{display:flex;flex-direction:column}.exercise-item{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--border)}.exercise-item:last-child{border:0}.exercise-number{font:600 23px var(--head);color:var(--quiet);width:25px}.exercise-art{width:52px;height:48px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;font-size:22px;flex:none}.exercise-text{flex:1;min-width:0}.exercise-text strong{display:block;font-size:12px;margin-bottom:4px}.exercise-text small{font-size:10px;color:var(--muted)}.volume{font-size:11px;color:var(--muted);text-align:right}.summary-metric{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:12px}.summary-metric:last-child{border:0}.summary-metric span{color:var(--muted)}.summary-metric strong{font-weight:600}.actions-row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:19px}
+/* builder / my plans */
+.builder-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}.builder-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}.builder-exercise{display:grid;grid-template-columns:30px minmax(0,1fr) 90px 90px 34px;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--border)}.builder-exercise .num{font:600 20px var(--head);color:var(--quiet)}.builder-exercise input{height:38px;width:100%;min-width:0;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:9px;padding:0 9px;font-size:11px}.icon-btn{width:32px;height:32px;border:0;background:transparent;color:var(--quiet);font-size:18px;border-radius:8px}.icon-btn:hover{color:var(--danger);background:rgba(228,87,75,.1)}.add-row{display:grid;grid-template-columns:minmax(0,1fr) 75px 75px auto;gap:8px;margin-top:15px}.add-row input,.field-input{height:42px;width:100%;min-width:0;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:10px;padding:0 11px;font-size:12px}.builder-side{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}.field{display:block;margin:13px 0}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}.builder-side .btn{width:100%;margin-top:9px}.saved-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.saved-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px}.saved-card h3{font:600 24px var(--head);margin:12px 0 6px}.saved-card p{font-size:11px;color:var(--muted);line-height:1.5;margin:0 0 14px}.saved-tags{display:flex;gap:6px;flex-wrap:wrap}.saved-tags span{font-size:9px;border:1px solid var(--border2);border-radius:20px;padding:5px 8px;color:var(--muted)}.empty-state{text-align:center;padding:46px 20px;border:1px dashed var(--border2);border-radius:16px;color:var(--muted)}.empty-state .empty-icon{font-size:30px;margin-bottom:12px}.empty-state h3{font:600 25px var(--head);color:var(--text);margin:0 0 6px}.empty-state p{font-size:12px;margin:0 0 15px}
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}.modal-backdrop.open{display:flex}.modal{width:min(460px,100%);background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.48)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.modal h2{font:600 30px var(--head);margin:0}.modal p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 17px}.choice{width:100%;display:flex;align-items:center;gap:13px;text-align:left;padding:15px;border:1px solid var(--border2);border-radius:13px;background:var(--surface2);color:var(--text);margin-top:10px}.choice:hover{border-color:var(--accent)}.choice-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:var(--accent-soft);color:var(--accent);font-size:20px}.choice strong{display:block;font-size:12px;margin-bottom:4px}.choice small{color:var(--muted);font-size:10px}.toast{position:fixed;z-index:70;bottom:24px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#2b2922;border:1px solid var(--border2);padding:11px 16px;border-radius:12px;color:var(--text);font-size:12px;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}.mobile-nav{display:none}
+@media(max-width:900px){main{padding-top:29px}.below-carousel{grid-template-columns:1fr}.detail-layout,.ai-layout{grid-template-columns:1fr}.builder-layout{grid-template-columns:1fr}.saved-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.page-head{margin-bottom:22px}}
+@media(max-width:650px){.topbar{height:64px;padding:0 18px}.topnav{display:none}.user-area .user-label{display:none}main{padding:25px 17px 104px}.page-head{display:block}.page-title{font-size:45px}.page-sub{font-size:12px}.page-head>.btn{margin-top:17px}.section-head{margin-top:22px}.section-title{font-size:24px}.carousel-viewport{margin:0 -17px}.carousel-track{gap:13px;padding:11px 11vw 22px}.template-card{flex-basis:78vw;height:280px}.template-card.active{transform:scale(1.015)}.carousel-arrow{width:35px;height:35px;font-size:18px}.carousel-arrow.prev{left:8px}.carousel-arrow.next{right:8px}.panel{padding:18px}.create-panel{align-items:flex-start}.create-panel .btn{white-space:nowrap}.create-actions{flex-direction:column}.create-actions .btn{width:100%}.detail-hero{min-height:245px;padding:22px}.focus-panel,.info-panel{padding:18px}.focus-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.focus-option{min-height:78px;font-size:11px}.selection-footer{align-items:flex-start;flex-direction:column}.selection-footer .btn{width:100%}.detail-stats{gap:10px}.builder-list{padding:16px}.builder-exercise{grid-template-columns:22px minmax(0,1fr) 60px 60px 28px;gap:6px}.builder-exercise input{font-size:10px;padding:0 6px}.add-row{grid-template-columns:minmax(0,1fr) 62px 62px}.add-row .btn{grid-column:1/-1}.saved-grid{grid-template-columns:1fr}.actions-row{justify-content:stretch}.actions-row .btn{flex:1}.mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:25;display:flex;justify-content:space-around;gap:6px;padding:9px 16px calc(9px + env(safe-area-inset-bottom));background:rgba(20,19,15,.94);backdrop-filter:blur(12px);border-top:1px solid var(--border)}.mobile-nav button{flex:1;background:none;border:0;color:var(--quiet);font-size:10px;padding:5px}.mobile-nav button.active{color:var(--accent)}.mobile-nav .nav-symbol{display:block;font-size:18px;margin-bottom:3px}.toast{bottom:85px}}
+@media(min-width:651px) and (max-width:900px){.template-card{flex-basis:320px;height:285px}.carousel-track{padding-left:calc((100% - 320px)/2);padding-right:calc((100% - 320px)/2)}.below-carousel{grid-template-columns:1fr 1fr}.focus-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:901px){.carousel-track{padding-left:calc((100% - 380px)/2);padding-right:calc((100% - 380px)/2)}.template-card{flex-basis:380px;height:315px}.carousel-viewport{padding-top:12px}.create-panel{min-height:174px}}
+
+/* AI-assisted plan with clinician-provided constraints */
+.ai-create-btn{border-color:rgba(85,199,181,.42);background:var(--mint-soft);color:var(--mint)}
+.ai-create-btn:hover{border-color:var(--mint);color:#D8FFF8}
+.medical-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:18px;align-items:start}
+.medical-form-panel,.medical-side{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;min-width:0}
+.medical-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.medical-field{display:block;min-width:0}
+.medical-field.full{grid-column:1/-1}
+.medical-field>span{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
+.medical-field input,.medical-field select,.medical-field textarea{width:100%;min-height:43px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;font-size:12px}
+.medical-field textarea{min-height:112px;resize:vertical;line-height:1.6}
+.medical-focus-list{display:flex;gap:8px;flex-wrap:wrap}
+.medical-focus-choice{display:inline-flex;align-items:center;gap:7px;padding:9px 11px;border:1px solid var(--border2);background:var(--surface2);border-radius:10px;color:var(--muted);font-size:11px;cursor:pointer}
+.medical-focus-choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:#FFD0BC}
+.medical-focus-choice input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.medical-field textarea::placeholder,.medical-field input::placeholder{color:var(--quiet)}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-top:15px;color:var(--muted);font-size:11px;line-height:1.55}
+.check-row input{accent-color:var(--accent);margin:2px 0 0;flex:none;width:16px;height:16px}
+.medical-condition-fields{margin-top:16px;padding:16px;border:1px solid var(--border2);border-radius:14px;background:rgba(255,255,255,.015)}
+.medical-condition-fields[hidden]{display:none}
+.medical-callout{padding:14px 15px;border-radius:12px;background:var(--accent-soft);border:1px solid rgba(255,90,31,.24);color:#FFD4C2;font-size:11px;line-height:1.65;margin:0 0 17px}
+.medical-info{padding:14px 15px;background:var(--mint-soft);border:1px solid rgba(85,199,181,.22);border-radius:13px;font-size:11px;line-height:1.65;color:var(--muted);margin-top:14px}
+.medical-info strong{color:var(--mint)}
+.medical-side ul{padding-left:18px;margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.75}
+.medical-result{margin-top:18px;padding:20px;border:1px solid rgba(85,199,181,.28);border-radius:16px;background:linear-gradient(135deg,rgba(85,199,181,.08),transparent 60%),var(--surface)}
+.medical-result[hidden]{display:none}
+.draft-status{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid rgba(255,90,31,.35);border-radius:30px;background:var(--accent-soft);color:#FFD0BC;font-size:10px;font-weight:700;letter-spacing:.5px}
+.draft-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.draft-summary>div{padding:12px;border:1px solid var(--border);background:var(--surface2);border-radius:11px;min-width:0}
+.draft-summary small{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}
+.draft-summary strong{display:block;font-size:12px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-wrap}
+.draft-outline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.draft-step{padding:13px;border:1px dashed var(--border2);border-radius:11px}
+.draft-step b{display:block;font-size:12px;margin-bottom:5px}
+.draft-step span{display:block;font-size:10px;color:var(--muted);line-height:1.55}
+.medical-warning{padding:13px 15px;border-left:3px solid var(--danger);background:rgba(228,87,75,.08);color:var(--muted);font-size:11px;line-height:1.65;margin-top:14px}
+.medical-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
+@media(max-width:900px){.medical-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.medical-form-panel,.medical-side{padding:17px}.medical-fields{grid-template-columns:1fr}.medical-field.full{grid-column:auto}.draft-summary{grid-template-columns:1fr}.draft-outline{grid-template-columns:1fr}.medical-actions .btn{width:100%}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">FORGE<span>.</span></div>
+    <nav class="topnav" aria-label="Main navigation">
+      <button class="nav-link active" data-screen="home">Plan</button>
+      <button class="nav-link" data-screen="myplans">My Plans</button>
+    </nav>
+    <div class="user-area"><span class="user-label">MY WORKSPACE</span><div class="avatar">U</div></div>
+  </header>
+  <main>
+    <section id="screen-home" class="screen active">
+      <div class="page-head">
+        <div><div class="eyebrow">TRAINING, YOUR WAY</div><h1 class="page-title">Your Plan</h1><p class="page-sub">เลือกแผนการออกกำลังกายที่เหมาะกับคุณ แล้วปรับ Body Focus และรายละเอียดให้เข้ากับร่างกาย เป้าหมาย และเวลาที่มี</p></div>
+      </div>
+      <div class="section-head"><div><h2 class="section-title">Workout Templates</h2><p class="section-note">เลือกการ์ดเพื่อดูรายละเอียดและปรับแผนต่อ</p></div><button class="text-link" id="see-myplans">ดู My Plans ↗</button></div>
+      <div class="carousel-wrap">
+        <button class="carousel-arrow prev" id="prev-card" aria-label="Previous template">‹</button>
+        <div class="carousel-viewport"><div class="carousel-track" id="template-track"></div></div>
+        <button class="carousel-arrow next" id="next-card" aria-label="Next template">›</button>
+        <div class="carousel-dots" id="carousel-dots"></div>
+      </div>
+      <div class="below-carousel">
+        <section class="panel">
+          <h3 class="panel-heading">Select Type</h3>
+          <p class="panel-sub">เลือกหมวดหมู่เพื่อกรอง Template ที่แสดงอยู่ <span style="color:var(--quiet)">(ตัวเลือกตัวอย่าง)</span></p>
+          <div class="type-list" id="type-list">
+            <button class="type-chip active" data-type="all">ทั้งหมด</button><button class="type-chip" data-type="gym">ยิม</button><button class="type-chip" data-type="cardio">คาร์ดิโอ</button><button class="type-chip" data-type="yoga">โยคะ / Mobility</button>
+          </div>
+        </section>
+        <section class="panel create-panel">
+          <div class="create-copy"><div class="eyebrow">BUILD YOUR OWN</div><h3 class="panel-heading">Create / Custom Plan</h3><p class="panel-sub" style="margin-bottom:0">เริ่มจาก Template, สร้างเองตั้งแต่ต้น หรือให้ AI ช่วยจัดทำร่างตามข้อมูลและข้อจำกัดของคุณ</p><div class="create-actions"><button class="btn primary" id="create-from-template">Start from Template</button><button class="btn ghost" id="create-from-scratch">Start from Scratch</button><button class="btn ai-create-btn" id="create-with-ai">✦ Create with AI</button></div></div>
+          <div class="create-icon">＋</div>
+        </section>
+      </div>
+    </section>
+
+    <section id="screen-medical" class="screen">
+      <button class="back" data-back="home">← กลับไปหน้า Plan</button>
+      <div class="page-head">
+        <div><div class="eyebrow">AI-ASSISTED PLAN BUILDER</div><h1 class="page-title">Create with AI</h1><p class="page-sub">ให้ AI ช่วยจัดทำร่าง Workout Plan จากเป้าหมาย ข้อมูลร่างกาย และข้อจำกัดที่แพทย์ระบุ โดยไม่ตีความหรือแทนที่คำสั่งแพทย์</p></div>
+      </div>
+      <div class="medical-layout">
+        <form class="medical-form-panel" id="medical-form">
+          <h2 class="panel-heading">Plan Preferences</h2>
+          <p class="panel-sub">เริ่มจากเป้าหมายและเงื่อนไขการฝึกของคุณ</p>
+          <div class="medical-fields">
+            <label class="medical-field"><span>เป้าหมายการฝึก</span><select id="medical-goal"><option value="เพิ่มความแข็งแรง">เพิ่มความแข็งแรง</option><option value="เพิ่มความฟิตโดยรวม">เพิ่มความฟิตโดยรวม</option><option value="เพิ่มความยืดหยุ่นและการเคลื่อนไหว">เพิ่มความยืดหยุ่นและการเคลื่อนไหว</option><option value="ดูแลน้ำหนัก">ดูแลน้ำหนัก</option></select></label>
+            <label class="medical-field"><span>เวลาที่มีต่อครั้ง</span><select id="medical-time"><option value="15–20 นาที">15–20 นาที</option><option value="20–30 นาที" selected>20–30 นาที</option><option value="30–45 นาที">30–45 นาที</option><option value="45–60 นาที">45–60 นาที</option></select></label>
+            <label class="medical-field full"><span>อุปกรณ์ที่มี</span><select id="medical-equipment"><option value="ไม่ใช้อุปกรณ์">ไม่ใช้อุปกรณ์</option><option value="อุปกรณ์พื้นฐานที่บ้าน">อุปกรณ์พื้นฐานที่บ้าน</option><option value="อุปกรณ์ในยิม">อุปกรณ์ในยิม</option><option value="ยังไม่ระบุ">ยังไม่ระบุ</option></select></label>
+            <div class="medical-field full"><span>Body Focus <small style="color:var(--quiet)">(เลือกได้หลายส่วน)</small></span><div class="medical-focus-list" id="medical-focus-list"><label class="medical-focus-choice"><input type="checkbox" value="Chest">Chest</label><label class="medical-focus-choice"><input type="checkbox" value="Back">Back</label><label class="medical-focus-choice"><input type="checkbox" value="Shoulders">Shoulders</label><label class="medical-focus-choice"><input type="checkbox" value="Biceps">Biceps</label><label class="medical-focus-choice"><input type="checkbox" value="Triceps">Triceps</label><label class="medical-focus-choice"><input type="checkbox" value="Legs">Legs</label><label class="medical-focus-choice"><input type="checkbox" value="Core">Core</label></div></div>
+          </div>
+          <label class="check-row"><input type="checkbox" id="medical-has-condition"><span>ฉันมีโรคประจำตัว ภาวะสุขภาพ หรือข้อจำกัดทางการแพทย์ที่ต้องนำมาพิจารณา</span></label>
+          <div class="medical-condition-fields" id="medical-condition-fields" hidden>
+            <div class="medical-callout">กรอกเฉพาะข้อมูลที่จำเป็นต่อการปรับแผน และคัดลอกคำแนะนำจากแพทย์ตามที่ได้รับจริง อย่าให้ AI เดาข้อจำกัดหรือกำหนดระดับการออกกำลังกายแทนแพทย์</div>
+            <div class="medical-fields">
+              <label class="medical-field full"><span>โรคประจำตัว / ภาวะสุขภาพ</span><input id="medical-condition" type="text" placeholder="ระบุชื่อภาวะตามที่ได้รับการวินิจฉัย" autocomplete="off"></label>
+              <label class="medical-field full"><span>คำสั่งหรือคำแนะนำจากแพทย์ <b style="color:var(--accent)">จำเป็น</b></span><textarea id="medical-instructions" placeholder="ใส่คำแนะนำจากแพทย์ตามจริง เช่น ข้อจำกัด ระดับความหนัก ระยะเวลา หรือเงื่อนไขที่ต้องปฏิบัติตาม"></textarea></label>
+              <label class="medical-field full"><span>ท่าหรือกิจกรรมที่แพทย์ระบุให้หลีกเลี่ยง (ถ้ามี)</span><textarea id="medical-avoid" placeholder="ระบุข้อห้ามเพิ่มเติมตามคำแนะนำจากแพทย์"></textarea></label>
+            </div>
+            <label class="check-row"><input type="checkbox" id="medical-confirmed"><span>ฉันยืนยันว่าได้ปรึกษาบุคลากรทางการแพทย์ที่ดูแลฉันเกี่ยวกับการออกกำลังกายแล้ว และข้อมูลที่กรอกเป็นคำแนะนำล่าสุดที่ได้รับ</span></label>
+          </div>
+          <label class="check-row"><input type="checkbox" id="medical-understand" required><span>ฉันเข้าใจว่าแผนที่ AI เสนอเป็นเพียงร่างเพื่อให้ตรวจสอบ ไม่ใช่การวินิจฉัย การอนุญาตให้ออกกำลังกาย หรือการรับรองความปลอดภัยทางการแพทย์</span></label>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:20px"><button class="btn primary" type="submit">✦ Generate AI Draft</button><button class="btn ghost" type="button" id="medical-clear">ล้างข้อมูล</button></div>
+          <p class="note">Prototype นี้ยังไม่เชื่อมต่อ LLM API ข้อมูลในฟอร์มจึงใช้เพื่อแสดงตัวอย่างการทำงานเท่านั้น และไม่ถูกบันทึกลง My Plans หรือ localStorage</p>
+        </form>
+        <aside class="medical-side">
+          <div class="eyebrow">DESIGN PRINCIPLES</div><h2 class="panel-heading" style="margin-top:6px">Medical-aware planning</h2>
+          <p class="panel-sub">แนวทางที่ระบบ AI ควรปฏิบัติเมื่อได้รับข้อมูลสุขภาพและคำสั่งแพทย์</p>
+          <ul>
+            <li>ใช้คำสั่งแพทย์ที่ผู้ใช้ให้มาเป็นข้อจำกัด ไม่เขียนทับหรือขยายความเอง</li>
+            <li>ไม่แนะนำท่าหรือระดับความหนักที่ขัดกับข้อจำกัดที่ระบุ</li>
+            <li>เมื่อคำสั่งไม่ชัดเจนหรือขัดแย้งกัน ต้องขอให้ผู้ใช้ยืนยันกับแพทย์ ไม่เดาคำตอบ</li>
+            <li>แสดงแผนเป็น Draft เพื่อให้ผู้เชี่ยวชาญที่เกี่ยวข้องตรวจสอบก่อนนำไปใช้</li>
+          </ul>
+          <div class="medical-info"><strong>ขอบเขตความรับผิดชอบ</strong><br>AI ช่วยจัดโครงสร้างและเสนอแผนเบื้องต้นได้ แต่ไม่สามารถตัดสินว่าโรคหรืออาการนั้นออกกำลังกายได้อย่างปลอดภัยหรือแทนคำสั่งแพทย์ได้</div>
+        </aside>
+      </div>
+      <section class="medical-result" id="medical-result" hidden aria-live="polite">
+        <div class="draft-status">● DRAFT · REVIEW REQUIRED</div>
+        <h2 class="section-title" style="margin:12px 0 4px">AI Plan Draft Preview</h2>
+        <p class="panel-sub" style="margin-bottom:0">ตัวอย่างผลลัพธ์ของ Flow เท่านั้น — ยังไม่มีการเรียก AI จริงหรือสร้างรายการท่าออกกำลังกาย</p>
+        <div class="draft-summary">
+          <div><small>Health condition</small><strong id="draft-condition">—</strong></div>
+          <div><small>Goal / Available time</small><strong id="draft-goal">—</strong></div>
+          <div><small>Body Focus</small><strong id="draft-focus">—</strong></div>
+          <div><small>Physician instructions</small><strong id="draft-instructions">—</strong></div>
+          <div><small>Activities to avoid</small><strong id="draft-avoid">—</strong></div>
+        </div>
+        <h3 class="panel-heading" style="margin-top:18px">Draft structure</h3>
+        <div class="draft-outline">
+          <div class="draft-step"><b>01 · Preparation</b><span>รอระบบ AI จริงจัดทำตามข้อจำกัดที่ได้รับการยืนยัน</span></div>
+          <div class="draft-step"><b>02 · Main session</b><span>ยังไม่แสดงท่า เซต หรือความหนัก จนกว่าจะประมวลผลข้อจำกัดได้อย่างถูกต้อง</span></div>
+          <div class="draft-step"><b>03 · Recovery</b><span>รายละเอียดการพักและการฟื้นตัวต้องสอดคล้องกับคำแนะนำของแพทย์</span></div>
+        </div>
+        <div class="medical-warning"><strong>ก่อนนำไปใช้:</strong> ผู้ใช้ต้องยืนยันความเหมาะสมกับแพทย์ผู้ดูแลก่อน โดยเฉพาะเมื่อมีโรคประจำตัวหรือข้อจำกัดทางการแพทย์ การตรวจโดย Trainer ในระบบเป็นอีกขั้นตอนหนึ่งและไม่ใช่สิ่งทดแทนการประเมินของแพทย์</div>
+        <div class="medical-actions"><button class="btn ghost" type="button" id="medical-edit">แก้ไขข้อมูล</button><button class="btn" type="button" id="medical-back-home">กลับไปหน้า Plan</button></div>
+      </section>
+    </section>
+
+    <section id="screen-detail" class="screen">
+      <button class="back" data-back="home">← กลับไปหน้า Plan</button>
+      <div class="detail-hero" id="detail-hero"><div class="detail-hero-content"><span class="tag accent" id="detail-category">GYM TEMPLATE</span><h2 id="detail-title">Full Body Foundation</h2><p id="detail-description"></p><div class="detail-stats" id="detail-stats"></div></div></div>
+      <div class="detail-layout">
+        <section class="focus-panel">
+          <div class="eyebrow">PERSONALIZE YOUR PLAN</div><h2 class="section-title" style="margin:6px 0">Choose Body Focus</h2><p class="panel-sub" style="margin-bottom:0">เลือกได้มากกว่าหนึ่งส่วน AI จะใช้สิ่งที่เลือกประกอบกับข้อมูลอื่นของคุณเพื่อปรับแผน</p>
+          <div class="focus-grid" id="focus-grid"></div>
+          <div class="selection-footer"><span class="selection-count" id="selection-count">เลือกแล้ว 0 ส่วน</span><button class="btn primary" id="adjust-plan">ปรับแผนด้วย AI <span>→</span></button></div>
+        </section>
+        <aside class="info-panel"><h3 class="panel-heading">Template Overview</h3><p class="panel-sub">ข้อมูลตัวอย่างของแผนสำเร็จรูป</p><div class="info-row"><span>Plan type</span><strong id="info-type">Strength</strong></div><div class="info-row"><span>Level</span><strong id="info-level">Beginner</strong></div><div class="info-row"><span>Duration</span><strong id="info-duration">45–60 min</strong></div><div class="info-row"><span>Frequency</span><strong id="info-frequency">3 days / week</strong></div><p class="note">Template ในหน้านี้เป็นข้อมูล Mockup สำหรับทดลอง UI ไม่ใช่คำแนะนำการฝึกเฉพาะบุคคล</p></aside>
+      </div>
+    </section>
+
+    <section id="screen-ai" class="screen">
+      <button class="back" data-back="detail">← กลับไปเลือก Body Focus</button>
+      <div class="page-head"><div><div class="eyebrow">PERSONALIZED PREVIEW</div><h1 class="page-title">Your Adjusted Plan</h1><p class="page-sub">ตัวอย่างหน้าผลลัพธ์หลัง AI นำ Body Focus และข้อมูลผู้ใช้มาพิจารณา</p></div><span class="tag" style="color:var(--mint);border-color:rgba(85,199,181,.35)">DEMO PREVIEW</span></div>
+      <div class="ai-banner"><div class="ai-mark">✦</div><div><strong>AI adjustment preview</strong><p>ส่วนนี้เป็น Mockup ยังไม่ได้เชื่อมต่อ LLM API หรืออ่านข้อมูลสุขภาพจริง</p></div></div>
+      <div class="ai-layout"><section class="panel"><div class="section-head" style="margin:0 0 12px"><div><h2 class="section-title">Workout Breakdown</h2><p class="section-note" id="ai-focus-label"></p></div><span class="tag">SAMPLE</span></div><div class="exercise-list" id="ai-exercises"></div></section><aside class="panel"><h3 class="panel-heading">Adjustment Summary</h3><p class="panel-sub">ปัจจัยที่ระบบควรนำมาพิจารณา</p><div class="summary-metric"><span>Selected focus</span><strong id="summary-focus">—</strong></div><div class="summary-metric"><span>Available time</span><strong>45 min · ตัวอย่าง</strong></div><div class="summary-metric"><span>Training history</span><strong>ต้องใช้ข้อมูลผู้ใช้</strong></div><div class="summary-metric"><span>Fatigue / Recovery</span><strong>ต้องใช้ข้อมูลผู้ใช้</strong></div><div class="summary-metric"><span>Limitations</span><strong>ต้องตรวจสอบ</strong></div><p class="note">ไม่มีการรับรองความปลอดภัยทางการแพทย์จาก AI ในหน้าจอตัวอย่างนี้ แผนจริงอาจต้องผ่าน Trainer Review ตาม Workflow ของโปรเจกต์</p></aside></div>
+      <div class="actions-row"><button class="btn ghost" id="ai-customize">Customize Plan</button><button class="btn primary" id="ai-use">Use This Plan</button></div>
+    </section>
+
+    <section id="screen-builder" class="screen">
+      <button class="back" data-back="home" id="builder-back">← กลับไปหน้า Plan</button>
+      <div class="page-head"><div><div class="eyebrow">PLAN BUILDER</div><h1 class="page-title" id="builder-title">Customize Plan</h1><p class="page-sub" id="builder-sub">ปรับรายละเอียดท่าออกกำลังกาย แล้วบันทึกเป็นแผนของคุณ</p></div></div>
+      <div class="builder-layout"><section class="builder-list"><div class="section-head" style="margin:0 0 10px"><div><h2 class="section-title">Exercises</h2><p class="section-note">แก้ไขชื่อท่า จำนวนเซต และจำนวนครั้งได้</p></div><span class="tag" id="builder-source">CUSTOM</span></div><div id="builder-exercises"></div><div class="add-row"><input id="new-exercise" placeholder="ชื่อท่าออกกำลังกาย" aria-label="Exercise name"><input id="new-sets" type="number" min="1" value="3" aria-label="Sets"><input id="new-reps" placeholder="ครั้ง" value="10" aria-label="Reps"><button class="btn small" id="add-exercise">＋ เพิ่มท่า</button></div></section><aside class="builder-side"><h3 class="panel-heading">Plan Details</h3><label class="field"><span style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px">ชื่อแผน</span><input class="field-input" id="builder-name" value="My Workout Plan"></label><label class="field"><span style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px">Body Focus</span><input class="field-input" id="builder-focus" readonly></label><label class="field"><span style="display:block;font-size:11px;color:var(--muted);margin-bottom:6px">หมายเหตุ</span><input class="field-input" id="builder-note" placeholder="เพิ่มรายละเอียด (ไม่บังคับ)"></label><button class="btn primary" id="save-plan">Save to My Plans</button><button class="btn ghost" id="cancel-builder">Cancel</button><p class="note">บันทึกใน Browser นี้ด้วย localStorage เพื่อทดลอง Prototype เท่านั้น</p></aside></div>
+    </section>
+
+    <section id="screen-myplans" class="screen">
+      <div class="page-head"><div><div class="eyebrow">YOUR LIBRARY</div><h1 class="page-title">My Plans</h1><p class="page-sub">แผนที่คุณเลือกหรือสร้างไว้ สามารถกลับมาเปิดดูหรือปรับแต่งสำเนาได้</p></div><button class="btn primary" id="myplans-create">＋ Create Plan</button></div>
+      <div id="saved-plans"></div>
+    </section>
+  </main>
+  <nav class="mobile-nav"><button class="active" data-screen="home"><span class="nav-symbol">▤</span>Plan</button><button data-screen="myplans"><span class="nav-symbol">▣</span>My Plans</button></nav>
+</div>
+<div class="modal-backdrop" id="create-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal"><div class="modal-head"><h2 id="modal-title">Create Plan</h2><button class="icon-btn" id="close-modal" aria-label="Close">×</button></div><p>เลือกวิธีเริ่มต้นสร้าง Workout Plan ของคุณ</p><button class="choice" id="modal-template"><span class="choice-icon">▤</span><span><strong>Start from Template</strong><small>เลือกแผนสำเร็จรูปแล้วแก้ไขเป็นสำเนาของคุณ</small></span></button><button class="choice" id="modal-scratch"><span class="choice-icon">＋</span><span><strong>Start from Scratch</strong><small>เริ่มสร้างแผนใหม่โดยไม่มีท่าเริ่มต้น</small></span></button></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const templates=[
+ {id:'fullbody',name:'Full Body Foundation',kicker:'STRENGTH · BEGINNER',category:'gym',categoryLabel:'GYM TEMPLATE',desc:'Build a balanced foundation with a simple full-body routine.',level:'Beginner',duration:'45–60 min',frequency:'3 days / week',image:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=85',exercises:[['Goblet Squat',3,12],['Dumbbell Bench Press',3,10],['Lat Pulldown',3,12],['Dumbbell Romanian Deadlift',3,10]]},
+ {id:'upper',name:'Upper Body Split',kicker:'STRENGTH · INTERMEDIATE',category:'gym',categoryLabel:'GYM TEMPLATE',desc:'A focused upper-body session covering push and pull patterns.',level:'Intermediate',duration:'50–65 min',frequency:'2 days / week',image:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=85',exercises:[['Bench Press',4,8],['Seated Cable Row',3,10],['Shoulder Press',3,10],['Cable Triceps Pushdown',3,12]]},
+ {id:'conditioning',name:'Athletic Conditioning',kicker:'CARDIO · ALL LEVELS',category:'cardio',categoryLabel:'CARDIO TEMPLATE',desc:'Combine steady movement and short intervals to build conditioning.',level:'All levels',duration:'30–40 min',frequency:'2–3 days / week',image:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=85',exercises:[['Treadmill Walk / Jog',1,'15 min'],['Stationary Bike',1,'10 min'],['Bodyweight Step-ups',3,12]]},
+ {id:'mobility',name:'Mobility & Reset',kicker:'MOBILITY · BEGINNER',category:'yoga',categoryLabel:'MOBILITY TEMPLATE',desc:'A gentle mobility-focused session with controlled movement and holds.',level:'Beginner',duration:'20–30 min',frequency:'2–4 days / week',image:'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=85',exercises:[['Cat-Cow',2,'8 reps'],['World’s Greatest Stretch',2,'5 / side'],['Child’s Pose',2,'30 sec'],['Hip Flexor Stretch',2,'30 sec']]}
+];
+const focusAreas=[['chest','Chest','◉'],['back','Back','▤'],['shoulders','Shoulders','◈'],['biceps','Biceps','⌁'],['triceps','Triceps','⌁'],['legs','Legs','▥'],['core','Core','◎']];
+let visibleTemplates=[...templates],activeIndex=1,selectedTemplate=templates[1],selectedFocus=[],builderExercises=[],aiPreviewExercises=[],builderSource='Custom',builderOrigin='home';
+const $=id=>document.getElementById(id);
+function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2300)}
+function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id==='screen-'+name));document.querySelectorAll('[data-screen]').forEach(b=>b.classList.toggle('active',b.dataset.screen===name));window.scrollTo({top:0,behavior:'smooth'});if(name==='myplans')renderSavedPlans()}
+function renderCarousel(){const track=$('template-track');track.innerHTML=visibleTemplates.map((p,i)=>`<button class="template-card ${i===activeIndex?'active':''}" data-index="${i}" aria-label="Open ${p.name}"><span class="photo" style="background-image:url('${p.image}')"></span><span class="card-topline"><span class="tag">${p.categoryLabel}</span><span class="tag">${p.level}</span></span><span class="template-copy"><span class="template-kicker">${p.kicker}</span><span class="template-name">${p.name}</span><span class="template-desc">${p.desc}</span><span class="template-meta"><span>◷ ${p.duration}</span><span>▦ ${p.frequency}</span></span></span></button>`).join('');$('carousel-dots').innerHTML=visibleTemplates.map((p,i)=>`<button class="dot ${i===activeIndex?'active':''}" data-dot="${i}" aria-label="Go to template ${i+1}"></button>`).join('');requestAnimationFrame(()=>{const card=track.querySelectorAll('.template-card')[activeIndex];if(card)card.scrollIntoView({inline:'center',block:'nearest',behavior:'auto'})})}
+function setActive(index){if(!visibleTemplates.length)return;activeIndex=(index+visibleTemplates.length)%visibleTemplates.length;renderCarousel()}
+function filterTemplates(type){visibleTemplates=type==='all'?[...templates]:templates.filter(t=>t.category===type);activeIndex=Math.min(1,visibleTemplates.length-1);document.querySelectorAll('.type-chip').forEach(b=>b.classList.toggle('active',b.dataset.type===type));renderCarousel()}
+$('template-track').addEventListener('click',e=>{const card=e.target.closest('.template-card');if(!card)return;const i=Number(card.dataset.index);selectedTemplate=visibleTemplates[i];openDetails(selectedTemplate)});
+$('carousel-dots').addEventListener('click',e=>{const dot=e.target.closest('[data-dot]');if(dot)setActive(Number(dot.dataset.dot))});$('prev-card').onclick=()=>setActive(activeIndex-1);$('next-card').onclick=()=>setActive(activeIndex+1);$('type-list').onclick=e=>{const b=e.target.closest('[data-type]');if(b)filterTemplates(b.dataset.type)};
+function openDetails(template){selectedTemplate=template;selectedFocus=[];$('detail-hero').style.backgroundImage=`url('${template.image}')`;$('detail-category').textContent=template.categoryLabel;$('detail-title').textContent=template.name;$('detail-description').textContent=template.desc;$('detail-stats').innerHTML=`<span>◷ ${template.duration}</span><span>▦ ${template.frequency}</span><span>◆ ${template.level}</span>`;$('info-type').textContent=template.categoryLabel.replace(' TEMPLATE','');$('info-level').textContent=template.level;$('info-duration').textContent=template.duration;$('info-frequency').textContent=template.frequency;renderFocus();showScreen('detail')}
+function renderFocus(){$('focus-grid').innerHTML=focusAreas.map(([id,label,icon])=>`<button class="focus-option ${selectedFocus.includes(id)?'selected':''}" data-focus="${id}" aria-pressed="${selectedFocus.includes(id)}"><span class="muscle-icon">${icon}</span>${label}</button>`).join('');$('selection-count').textContent=`เลือกแล้ว ${selectedFocus.length} ส่วน`;$('adjust-plan').disabled=selectedFocus.length===0}
+$('focus-grid').addEventListener('click',e=>{const b=e.target.closest('[data-focus]');if(!b)return;const id=b.dataset.focus;selectedFocus=selectedFocus.includes(id)?selectedFocus.filter(x=>x!==id):[...selectedFocus,id];renderFocus()});
+const focusNames=()=>selectedFocus.map(id=>focusAreas.find(x=>x[0]===id)?.[1]).filter(Boolean);
+$('adjust-plan').onclick=()=>{if(!selectedFocus.length)return;renderAiPreview();showScreen('ai')};
+function renderAiPreview(){const focus=focusNames();$('ai-focus-label').textContent=`${selectedTemplate.name} · ${focus.join(' + ')}`;$('summary-focus').textContent=focus.join(' + ');let items=selectedTemplate.exercises.slice(0,4);if(focus.includes('chest')&&!items.some(x=>/bench|push/i.test(x[0])))items.unshift(['Dumbbell Bench Press',3,10]);if(focus.includes('legs')&&!items.some(x=>/squat|leg/i.test(x[0])))items.push(['Goblet Squat',3,10]);if(focus.includes('back')&&!items.some(x=>/row|pull|lat/i.test(x[0])))items.push(['Seated Cable Row',3,10]);items=items.slice(0,5);aiPreviewExercises=items;$('ai-exercises').innerHTML=items.map((x,i)=>`<div class="exercise-item"><div class="exercise-number">${String(i+1).padStart(2,'0')}</div><div class="exercise-art">${['↗','⇵','↔','◉','⌁'][i%5]}</div><div class="exercise-text"><strong>${x[0]}</strong><small>Suggested exercise · Sample data</small></div><div class="volume">${x[1]} sets<br>${x[2]} reps</div></div>`).join('')}
+function startBuilder(exercises,source,name,focus,origin='home'){builderExercises=exercises.map(x=>Array.isArray(x)?({name:x[0],sets:x[1],reps:x[2]}):({name:x.name,sets:x.sets,reps:x.reps}));builderSource=source;builderOrigin=origin;$('builder-title').textContent=source==='Scratch'?'Create Custom Plan':'Customize Plan';$('builder-sub').textContent=source==='Scratch'?'เริ่มสร้างแผนใหม่ด้วยการเพิ่มท่าออกกำลังกาย':'แก้ไขสำเนาของแผนต้นฉบับ รายการที่แก้ไขจะไม่เปลี่ยน Template';$('builder-source').textContent=source.toUpperCase();$('builder-name').value=name||'My Workout Plan';$('builder-focus').value=focus||'ยังไม่ได้เลือก';$('builder-note').value='';renderBuilderExercises();$('builder-back').dataset.back=origin==='detail'?'detail':origin==='ai'?'ai':origin==='myplans'?'myplans':'home';showScreen('builder')}
+function renderBuilderExercises(){$('builder-exercises').innerHTML=builderExercises.length?builderExercises.map((x,i)=>`<div class="builder-exercise"><span class="num">${String(i+1).padStart(2,'0')}</span><input data-edit="name" data-i="${i}" value="${escapeHtml(x.name)}" aria-label="Exercise ${i+1} name"><input data-edit="sets" data-i="${i}" type="number" min="1" value="${x.sets}" aria-label="Sets"><input data-edit="reps" data-i="${i}" value="${escapeHtml(x.reps)}" aria-label="Reps"><button class="icon-btn" data-remove="${i}" aria-label="Remove exercise">×</button></div>`).join(''):`<div class="empty-state" style="padding:25px 10px;border:0"><div class="empty-icon">＋</div><h3>เริ่มเพิ่มท่าแรก</h3><p>แผนนี้ยังไม่มีท่าออกกำลังกาย</p></div>`}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('builder-exercises').addEventListener('change',e=>{const f=e.target.dataset.edit;if(!f)return;const i=Number(e.target.dataset.i);builderExercises[i][f]=f==='sets'?Math.max(1,Number(e.target.value)||1):e.target.value});$('builder-exercises').addEventListener('click',e=>{const b=e.target.closest('[data-remove]');if(!b)return;builderExercises.splice(Number(b.dataset.remove),1);renderBuilderExercises()});$('add-exercise').onclick=()=>{const name=$('new-exercise').value.trim();if(!name){toast('กรุณากรอกชื่อท่าออกกำลังกาย');$('new-exercise').focus();return}builderExercises.push({name,sets:Math.max(1,Number($('new-sets').value)||3),reps:$('new-reps').value.trim()||'10'});$('new-exercise').value='';renderBuilderExercises()};
+function loadSaved(){try{return JSON.parse(localStorage.getItem('forge.plan.saved')||'[]')}catch(e){return []}}function storeSaved(list){try{localStorage.setItem('forge.plan.saved',JSON.stringify(list))}catch(e){toast('บันทึกใน Browser ไม่สำเร็จ')}}
+$('save-plan').onclick=()=>{const name=$('builder-name').value.trim();if(!name){toast('กรุณาตั้งชื่อแผน');return}if(!builderExercises.length){toast('เพิ่มท่าออกกำลังกายอย่างน้อย 1 ท่า');return}const saved=loadSaved();saved.unshift({id:Date.now(),name,source:builderSource,focus:$('builder-focus').value,note:$('builder-note').value,exercises:builderExercises,createdAt:new Date().toLocaleDateString('th-TH')});storeSaved(saved);toast('บันทึกแผนไว้ใน My Plans แล้ว');showScreen('myplans')};
+function renderSavedPlans(){const saved=loadSaved();const wrap=$('saved-plans');if(!saved.length){wrap.innerHTML=`<div class="empty-state"><div class="empty-icon">▣</div><h3>ยังไม่มีแผนที่บันทึกไว้</h3><p>เลือก Template หรือสร้างแผนใหม่เพื่อเริ่มต้น</p><button class="btn primary" id="empty-create">＋ Create Plan</button></div>`;$('empty-create').onclick=openCreateModal;return}wrap.innerHTML=`<div class="saved-grid">${saved.map(p=>`<article class="saved-card"><span class="tag">${escapeHtml(p.source)}</span><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.focus||'ยังไม่ได้เลือก Body Focus')}<br>${p.exercises.length} exercises · ${escapeHtml(p.createdAt)}</p><div class="saved-tags">${p.exercises.slice(0,3).map(x=>`<span>${escapeHtml(x.name)}</span>`).join('')}</div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn small" data-open-saved="${p.id}">Open / Edit Copy</button><button class="icon-btn" data-delete-saved="${p.id}" aria-label="Delete plan">×</button></div></article>`).join('')}</div>`}
+$('saved-plans').addEventListener('click',e=>{const open=e.target.closest('[data-open-saved]');const del=e.target.closest('[data-delete-saved]');if(open){const p=loadSaved().find(x=>x.id===Number(open.dataset.openSaved));if(p)startBuilder(p.exercises,'Saved Copy',p.name,p.focus,'myplans')}if(del){storeSaved(loadSaved().filter(x=>x.id!==Number(del.dataset.deleteSaved)));renderSavedPlans();toast('ลบแผนแล้ว')}});
+function openCreateModal(){$('create-modal').classList.add('open')}function closeCreateModal(){$('create-modal').classList.remove('open')}$('myplans-create').onclick=openCreateModal;$('close-modal').onclick=closeCreateModal;$('create-modal').addEventListener('click',e=>{if(e.target===$('create-modal'))closeCreateModal()});$('create-from-template').onclick=()=>{closeCreateModal();openDetails(visibleTemplates[activeIndex]||templates[0])};$('create-from-scratch').onclick=()=>{closeCreateModal();startBuilder([],'Scratch','My Custom Plan','ยังไม่ได้เลือก','home')};$('modal-template').onclick=()=>{$('create-modal').classList.remove('open');openDetails(visibleTemplates[activeIndex]||templates[0])};$('modal-scratch').onclick=()=>{$('create-modal').classList.remove('open');startBuilder([],'Scratch','My Custom Plan','ยังไม่ได้เลือก','home')};
+
+$('create-with-ai').onclick=()=>{ $('medical-form').reset(); $('medical-condition-fields').hidden=true; $('medical-result').hidden=true; $('medical-condition').required=false; $('medical-instructions').required=false; $('medical-confirmed').required=false; showScreen('medical'); };
+$('medical-has-condition').addEventListener('change',e=>{
+  const enabled=e.target.checked;
+  $('medical-condition-fields').hidden=!enabled;
+  $('medical-condition').required=enabled;
+  $('medical-instructions').required=enabled;
+  $('medical-confirmed').required=enabled;
+});
+$('medical-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const hasCondition=$('medical-has-condition').checked;
+  if(hasCondition){
+    if(!$('medical-condition').value.trim()){toast('กรุณาระบุโรคประจำตัวหรือภาวะสุขภาพ');$('medical-condition').focus();return;}
+    if(!$('medical-instructions').value.trim()){toast('กรุณาระบุคำแนะนำจากแพทย์');$('medical-instructions').focus();return;}
+    if(!$('medical-confirmed').checked){toast('กรุณายืนยันว่าคำแนะนำเป็นข้อมูลล่าสุด');$('medical-confirmed').focus();return;}
+  }
+  if(!$('medical-understand').checked){toast('กรุณายืนยันความเข้าใจเกี่ยวกับร่างแผน AI');return;}
+  // Display-only preview. Health details intentionally remain in memory and are never stored.
+  $('draft-condition').textContent=hasCondition?$('medical-condition').value.trim():'ไม่ได้ระบุโรคประจำตัวหรือข้อจำกัดทางการแพทย์';
+  $('draft-goal').textContent=$('medical-goal').value+' · '+$('medical-time').value+' · '+$('medical-equipment').value;
+  const selectedMedicalFocus=[...document.querySelectorAll('#medical-focus-list input:checked')].map(input=>input.value);
+  $('draft-focus').textContent=selectedMedicalFocus.length?selectedMedicalFocus.join(' + '):'ยังไม่ได้ระบุ — ให้กำหนดก่อนสร้างแผนจริง';
+  $('draft-instructions').textContent=hasCondition?$('medical-instructions').value.trim():'ไม่มีคำสั่งแพทย์ที่ระบุในแบบฟอร์มนี้';
+  $('draft-avoid').textContent=hasCondition?($('medical-avoid').value.trim()||'ไม่ได้ระบุ'):'ไม่ได้ระบุ';
+  $('medical-result').hidden=false;
+  $('medical-result').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('medical-clear').onclick=()=>{ $('medical-form').reset(); $('medical-condition-fields').hidden=true; $('medical-condition').required=false; $('medical-instructions').required=false; $('medical-confirmed').required=false; $('medical-result').hidden=true; toast('ล้างข้อมูลในฟอร์มแล้ว'); };
+$('medical-edit').onclick=()=>{ $('medical-result').hidden=true; $('medical-form').scrollIntoView({behavior:'smooth',block:'start'}); };
+$('medical-back-home').onclick=()=>{ $('medical-result').hidden=true; showScreen('home'); };
+
+$('ai-customize').onclick=()=>startBuilder(aiPreviewExercises,'AI Adjusted Copy',selectedTemplate.name+' — Custom',focusNames().join(' + '),'ai');$('ai-use').onclick=()=>startBuilder(aiPreviewExercises,'AI Preview Copy',selectedTemplate.name+' — AI Plan',focusNames().join(' + '),'ai');$('cancel-builder').onclick=()=>showScreen(builderOrigin==='detail'?'detail':builderOrigin==='ai'?'ai':builderOrigin==='myplans'?'myplans':'home');$('see-myplans').onclick=()=>showScreen('myplans');
+document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.back)));document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.screen)));$('myplans-create').onclick=openCreateModal;
+renderCarousel();renderSavedPlans();
+</script>
+</body>
+</html>
