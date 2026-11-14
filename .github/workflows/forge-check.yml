@@ -1,0 +1,56 @@
+name: Forge check (manual)
+
+# app/forge contains only lib/ and test/ (no Flutter project shell), and it has
+# never been compiled. This workflow creates a temporary Flutter project,
+# overlays the Forge sources, then runs analyze + test.
+# It is manual on purpose: run it from the Actions tab (Run workflow), read the
+# result, fix problems, and only then add push/pull_request triggers.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  forge:
+    name: forge (create shell, analyze, test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install SQLite library (for drift tests)
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
+      - name: Create project shell and overlay Forge sources
+        run: |
+          flutter create --project-name forge --org com.example --platforms=android "$RUNNER_TEMP/forge_app"
+          rm -rf "$RUNNER_TEMP/forge_app/lib" "$RUNNER_TEMP/forge_app/test"
+          cp -r app/forge/lib "$RUNNER_TEMP/forge_app/lib"
+          cp -r app/forge/test "$RUNNER_TEMP/forge_app/test"
+
+      - name: Add dependencies
+        working-directory: ${{ runner.temp }}/forge_app
+        run: |
+          flutter pub add flutter_riverpod drift drift_flutter path_provider uuid camera google_mlkit_pose_detection google_mlkit_commons
+          flutter pub add --dev drift_dev build_runner
+
+      - name: Generate drift code
+        working-directory: ${{ runner.temp }}/forge_app
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze
+        working-directory: ${{ runner.temp }}/forge_app
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        working-directory: ${{ runner.temp }}/forge_app
+        run: flutter test
