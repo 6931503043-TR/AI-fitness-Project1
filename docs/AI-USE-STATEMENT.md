@@ -8,7 +8,7 @@ This statement explains how generative AI is used while developing this reposito
 
 ## 1. AI-assisted development
 
-Generative AI assistants, including ChatGPT, have been used as supporting tools during project planning and development. They may be used to help with:
+Generative AI assistants, including ChatGPT, Claude, have been used as supporting tools during project planning and development. They may be used to help with:
 
 - Exploring requirements, user journeys, interface ideas, and technical approaches
 - Drafting or improving documentation and explanatory text
