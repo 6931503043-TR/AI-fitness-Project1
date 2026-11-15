@@ -13,6 +13,7 @@ import 'move_guides.dart';
 import 'pose_painter.dart';
 import 'pose_stability.dart';
 import 'rep_counter.dart';
+import 'start_gate.dart';
 
 const _teal = Color(0xFF2BB3A3);
 const _orange = Color(0xFFFF5A1F);
@@ -126,6 +127,11 @@ class _MotionScreenState extends State<MotionScreen> {
   // กรองตำแหน่งจุดข้อต่อ (ลดอาการสั่น) และเลือกข้างแบบไม่สลับไปมา
   final LandmarkSmoother<PoseLandmarkType> _smoother = LandmarkSmoother();
   final StickyPicker _picker = StickyPicker();
+
+  // นับถอยหลังหลังกด "เริ่ม" (ให้เวลาเข้าท่า) ยังไม่นับครั้งจนกว่าจะครบเวลา
+  final StartGate _gate = StartGate(countdownSec: 5);
+  bool _countingStarted = false;
+  int _countdownLeft = 0;
   bool _filterOn = true;
   double _minCutoff = 1.5;
   final Stopwatch _clock = Stopwatch()..start();
@@ -367,7 +373,8 @@ class _MotionScreenState extends State<MotionScreen> {
           'fps=${_fps.toStringAsFixed(1)},rx=${_rxFps.toStringAsFixed(1)},'
           'ms=${_inferMs.toStringAsFixed(0)},detect=${_detectMs.toStringAsFixed(0)},'
           'angle=${_angle?.round()},min=${_minAngle?.round()},'
-          'max=${_maxAngle?.round()},reps=${_counter.reps}');
+          'max=${_maxAngle?.round()},reps=${_counter.reps},'
+          'phase=${_countingStarted ? 'run' : 'wait'}');
     }
   }
 
@@ -415,8 +422,20 @@ class _MotionScreenState extends State<MotionScreen> {
 
       final m = _measure(points);
       final angle = m?.angle;
+      // ช่วงนับถอยหลัง: ยังแสดงเส้นและมุม แต่ไม่นับครั้งและไม่เก็บค่าต่ำสุด/สูงสุด
+      final counting = !_gate.isWaiting(nowSec);
+      if (counting && !_countingStarted) {
+        // เพิ่งพ้นช่วงนับถอยหลัง: ล้างทุกอย่างที่เก็บมาระหว่างจัดท่า
+        _countingStarted = true;
+        _counter.reset();
+        _picker.reset();
+        _minAngle = null;
+        _maxAngle = null;
+        HapticFeedback.mediumImpact();
+      }
+      _countdownLeft = _gate.secondsLeft(nowSec);
       var repDone = false;
-      if (angle != null) {
+      if (angle != null && counting) {
         repDone = _counter.update(angle);
         _minAngle = _minAngle == null ? angle : math.min(_minAngle!, angle);
         _maxAngle = _maxAngle == null ? angle : math.max(_maxAngle!, angle);
@@ -497,6 +516,10 @@ class _MotionScreenState extends State<MotionScreen> {
     _picker.reset();
     _lastFrameSec = null;
     _overlay.value = null;
+    final startSec = _clock.elapsedMicroseconds / 1e6;
+    _gate.begin(startSec);
+    _countingStarted = false;
+    _countdownLeft = _gate.secondsLeft(startSec);
     setState(() {
       _running = true;
       _points = const {};
@@ -511,6 +534,9 @@ class _MotionScreenState extends State<MotionScreen> {
   Future<void> _stop() async {
     final c = _controller;
     _overlay.value = null;
+    _gate.reset();
+    _countingStarted = false;
+    _countdownLeft = 0;
     setState(() {
       _running = false;
       _points = const {};
@@ -540,6 +566,9 @@ class _MotionScreenState extends State<MotionScreen> {
   /// ข้อความบอกว่าต้องทำอะไรต่อ (ตอบโจทย์ "ต้องลง/ขึ้นถึงจุดไหน")
   String _cue(MoveGuide guide) {
     if (!_running) return 'กด "เริ่ม" เพื่อเริ่มนับ';
+    if (_countdownLeft > 0) {
+      return 'เตรียมเข้าท่า… เริ่มนับใน $_countdownLeft วินาที';
+    }
     final a = _angle;
     if (a == null) return 'ยังไม่เห็นข้อต่อที่ต้องใช้ ดูรายการจุดด้านล่าง';
     if (DateTime.now().difference(_lastRepAt).inMilliseconds < 700) {
@@ -572,35 +601,46 @@ class _MotionScreenState extends State<MotionScreen> {
     final canvas = Size(ps.height, ps.width);
     final lens = _cameras[_cameraIndex].lensDirection;
 
-    return FittedBox(
-      fit: BoxFit.cover,
-      child: SizedBox(
-        width: canvas.width,
-        height: canvas.height,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CameraPreview(c),
-            ValueListenableBuilder<_Overlay?>(
-              valueListenable: _overlay,
-              builder: (context, o, child) {
-                if (!_running || o == null) return const SizedBox.shrink();
-                return CustomPaint(
-                  painter: PosePainter(
-                    points: o.points,
-                    imageSize: o.imageSize,
-                    rotation: o.rotation,
-                    lens: lens,
-                    focusSides: o.sides,
-                    focusColor: o.color,
-                    angleText: o.angleText,
-                  ),
-                );
-              },
+    return LayoutBuilder(
+      builder: (context, box) {
+        // FittedBox ขยาย canvas (ขนาดตามความละเอียดกล้อง) ให้เต็มกรอบ ความละเอียดต่ำจึงขยายมาก
+        // เส้นที่กำหนดเป็นหน่วย canvas จะหนาขึ้นตาม ชดเชยให้ความหนาบนจอคงที่ทุกความละเอียด
+        final fitScale = (box.hasBoundedWidth && box.hasBoundedHeight)
+            ? math.max(box.maxWidth / canvas.width, box.maxHeight / canvas.height)
+            : 1.0;
+        final lineScale = 1 / fitScale;
+        return FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: canvas.width,
+            height: canvas.height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CameraPreview(c),
+                ValueListenableBuilder<_Overlay?>(
+                  valueListenable: _overlay,
+                  builder: (context, o, child) {
+                    if (!_running || o == null) return const SizedBox.shrink();
+                    return CustomPaint(
+                      painter: PosePainter(
+                        points: o.points,
+                        imageSize: o.imageSize,
+                        rotation: o.rotation,
+                        lens: lens,
+                        focusSides: o.sides,
+                        focusColor: o.color,
+                        angleText: o.angleText,
+                        lineScale: lineScale,
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -812,6 +852,18 @@ class _MotionScreenState extends State<MotionScreen> {
                 _smoothing = v;
                 _counter.smoothing = v;
               }),
+            ),
+            Text(
+                'นับถอยหลังก่อนเริ่มนับ ${_gate.countdownSec.round()} วินาที (0 = เริ่มนับทันที)',
+                style: const TextStyle(fontSize: 13)),
+            Slider(
+              min: 0,
+              max: 15,
+              divisions: 15,
+              value: _gate.countdownSec,
+              onChanged: _running
+                  ? null
+                  : (v) => setState(() => _gate.countdownSec = v),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
