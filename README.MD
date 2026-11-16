@@ -61,14 +61,13 @@ AI-fitness-Project1/
 │   ├── M2-srs.pdf             # Software Requirements Specification
 │   ├── final-report.md        # Final summary report & Golden Thread traceability
 │   ├── ai-use-statement.md    # Disclosure of AI tools used during development
-│   └── design/                # UML & Architecture diagrams
-├── Prototype/                 # Browser entry point for the interactive prototype
-│   └── index.html             # Redirects to the Unified Prototype
-├── docs/
+│   ├── design/                # UML & Architecture diagrams
 │   └── prototypes/
 │       └── unified/
 │           └── ai-fitness-coach-unified-prototype.html
 │                                # Main standalone interactive HTML prototype
+├── Prototype/                 # Browser entry point for the interactive prototype
+│   └── index.html             # Redirects to the Unified Prototype
 ├── slides/                    # Presentation materials
 │   └── demo-slides.pdf        # Final demo presentation slides
 ├── app/                       # Main Flutter mobile application (Riverpod + Drift SQLite)
