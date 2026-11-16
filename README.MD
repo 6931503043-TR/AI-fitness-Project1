@@ -22,7 +22,7 @@ The interactive UI prototype is built with standalone HTML, CSS, and JavaScriptâ
 
 1. **Via Local Browser (Recommended):**
    - Clone or download this repository.
-   - Open the file [`prototype/index.html`](prototype/index.html) directly in any modern web browser (Chrome, Edge, Safari, or Firefox).
+   - Open the file [`prototype/index.html`](prototype/index.html) or [docs/Prototypes/unified/ai-fitness-coach-unified-prototype.html] directly in any modern web browser (Chrome, Edge, Safari, or Firefox).
    - Use the navigation hub on `index.html` to switch between all core screens:
      - **Workout Planner (`plan.html`)**: Browse templates, filter by muscle group, and generate/customize plans with AI.
      - **Body Status Dashboard (`body.html`)**: View muscle fatigue, recovery readiness, TDEE, and hydration status.
