@@ -2,8 +2,9 @@ import 'dart:io' show Platform;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+
+import 'pose_stability.dart';
 
 /// แปลงพิกัด x จากภาพดิบของกล้อง ไปเป็นพิกัดบน canvas ที่วางทับ preview
 /// (ตามตัวอย่างทางการของ google_mlkit_flutter ต้องล็อกจอแนวตั้งให้ canvas ตรงกับ preview)
@@ -60,18 +61,33 @@ const _bones = <List<PoseLandmarkType>>[
   [PoseLandmarkType.rightKnee, PoseLandmarkType.rightAnkle],
 ];
 
+/// ความหนาเส้นเป็นหน่วยพิกเซลบนจอจริง (dp) ไม่ขึ้นกับความละเอียดกล้อง
+/// ค่าตั้งให้ใกล้กับที่เห็นตอนใช้ความละเอียดสูงบนจอกว้างราว 411 dp (ประมาณจากการคำนวณ ปรับได้)
+const _faintStrokeDp = 1.1;
+const _faintDotDp = 1.6;
+const _hotStrokeDp = 3.8;
+const _hotDotDp = 4.2;
+const _labelFontDp = 13.0;
+
+/// วาดจุดเฉพาะข้อต่อลำตัว (ไม่วาดใบหน้า/นิ้ว/ปลายเท้า ซึ่งซ้อนทับกันมากและไม่ได้ใช้นับท่า)
+final Set<PoseLandmarkType> _jointTypes = {
+  for (final b in _bones) ...b,
+};
+
 class PosePainter extends CustomPainter {
   PosePainter({
-    required this.pose,
+    required this.points,
     required this.imageSize,
     required this.rotation,
     required this.lens,
     required this.focusSides,
     required this.focusColor,
     this.angleText,
+    this.lineScale = 1.0,
   });
 
-  final Pose pose;
+  /// จุดที่ผ่านการกรองแล้ว (มีเฉพาะจุดที่มั่นใจพอหรือกำลังค้างค่าเดิมสั้นๆ)
+  final Map<PoseLandmarkType, LmPoint> points;
   final Size imageSize;
   final InputImageRotation rotation;
   final CameraLensDirection lens;
@@ -85,11 +101,13 @@ class PosePainter extends CustomPainter {
   /// ตัวเลขมุมที่แสดงข้างจุดหมุน
   final String? angleText;
 
-  static const _minLikelihood = 0.5;
+  /// หน่วย canvas ต่อ 1 dp บนจอ (= 1 / อัตราที่ FittedBox ขยาย canvas)
+  /// ใช้คูณความหนาเส้น/ขนาดจุด/ตัวอักษร ให้ดูเท่ากันทุกความละเอียดกล้อง
+  final double lineScale;
 
   Offset? _point(PoseLandmarkType t, Size size) {
-    final l = pose.landmarks[t];
-    if (l == null || l.likelihood < _minLikelihood) return null;
+    final l = points[t];
+    if (l == null) return null;
     return Offset(
       translateX(l.x, size, imageSize, rotation, lens),
       translateY(l.y, size, imageSize, rotation, lens),
@@ -98,14 +116,15 @@ class PosePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final k = lineScale;
     final faint = Paint()
       ..color = Colors.white38
-      ..strokeWidth = 2
+      ..strokeWidth = _faintStrokeDp * k
       ..style = PaintingStyle.stroke;
     final faintDot = Paint()..color = Colors.white54;
     final hot = Paint()
       ..color = focusColor
-      ..strokeWidth = 7
+      ..strokeWidth = _hotStrokeDp * k
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     final hotDot = Paint()..color = focusColor;
@@ -117,9 +136,9 @@ class PosePainter extends CustomPainter {
       if (p1 == null || p2 == null) continue;
       canvas.drawLine(p1, p2, faint);
     }
-    for (final t in PoseLandmarkType.values) {
+    for (final t in _jointTypes) {
       final p = _point(t, size);
-      if (p != null) canvas.drawCircle(p, 3, faintDot);
+      if (p != null) canvas.drawCircle(p, _faintDotDp * k, faintDot);
     }
 
     // ข้างที่ใช้วัดมุม (เด่น)
@@ -130,43 +149,46 @@ class PosePainter extends CustomPainter {
       if (p0 != null && p1 != null) canvas.drawLine(p0, p1, hot);
       if (p1 != null && p2 != null) canvas.drawLine(p1, p2, hot);
       for (final p in [p0, p1, p2]) {
-        if (p != null) canvas.drawCircle(p, 8, hotDot);
+        if (p != null) canvas.drawCircle(p, _hotDotDp * k, hotDot);
       }
     }
 
     final text = angleText;
     if (text != null && focusSides.isNotEmpty) {
       final pivot = _point(focusSides.first[1], size);
-      if (pivot != null) _label(canvas, pivot, text);
+      if (pivot != null) _label(canvas, pivot, text, k);
     }
   }
 
-  void _label(Canvas canvas, Offset at, String text) {
+  void _label(Canvas canvas, Offset at, String text, double k) {
     final tp = TextPainter(
       text: TextSpan(
         text: text,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
-          fontSize: 24,
+          fontSize: _labelFontDp * k,
           fontWeight: FontWeight.w700,
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
     final rect = Rect.fromLTWH(
-      at.dx + 14,
-      at.dy - tp.height - 10,
-      tp.width + 14,
-      tp.height + 6,
+      at.dx + 8 * k,
+      at.dy - tp.height - 6 * k,
+      tp.width + 10 * k,
+      tp.height + 4 * k,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(8)),
+      RRect.fromRectAndRadius(rect, Radius.circular(6 * k)),
       Paint()..color = Colors.black87,
     );
-    tp.paint(canvas, Offset(rect.left + 7, rect.top + 3));
+    tp.paint(canvas, Offset(rect.left + 5 * k, rect.top + 2 * k));
   }
 
   @override
   bool shouldRepaint(covariant PosePainter old) =>
-      old.pose != pose || old.focusColor != focusColor || old.angleText != angleText;
+      old.points != points ||
+      old.focusColor != focusColor ||
+      old.angleText != angleText ||
+      old.lineScale != lineScale;
 }
